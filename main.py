@@ -2,7 +2,7 @@
 TREASURE MINE
 =============
 
-`Treasure Mine` is a game. TODO: add description
+`Treasure Mine` is a single-player game with various obstacles in a mine, more challenging with each deeper level.
 """
 
 __author__ = "M. Yasin Yildirim"
@@ -53,8 +53,20 @@ class GameScreen(Screen):
     game_screen = GameBE()
     game_screen.load_design()
 
+    touch_x, touch_y = None, None
+
     def on_pre_enter(self, *args):
         self.game_screen.initialize_map(self.canvas)
+
+    def on_move(self, dt):
+        self.game_screen.update_position(self.touch_x, self.touch_y)
+
+    def on_touch_down(self, touch):
+        self.touch_x, self.touch_y = touch.x, touch.y
+        Clock.schedule_interval(self.on_move, 0.05)
+
+    def on_touch_up(self, touch):
+        Clock.unschedule(self.on_move)
 
 
 initial_screens = [

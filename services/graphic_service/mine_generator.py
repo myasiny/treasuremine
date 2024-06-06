@@ -1,7 +1,7 @@
 import random
 
 from kivy.core.window import Window
-from kivy.graphics import Canvas, Color, Ellipse
+from kivy.graphics import Canvas, Color, Ellipse, Rectangle
 
 
 class MineGenerator:
@@ -10,7 +10,43 @@ class MineGenerator:
     tile_amount = 50
     object_size = map_size // tile_amount
     occupied_tiles = set()
-    obstacles = []
+    objects = {}
+    coordinates = {
+        "characters": [],
+        "obstacles": []
+    }
+
+    def create_character(self) -> None:
+        """
+        Assigns random coordinates for character to be placed on.
+        :return:
+        """
+
+        while True:
+            x = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
+            y = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
+            if (x, y) not in self.occupied_tiles:
+                self.occupied_tiles.add((x, y))
+                self.coordinates["characters"].append((x, y))
+                break
+
+    def draw_character(self, canvas: Canvas) -> None:
+        """
+        Creates visual element on screen for the character.
+        :param canvas: Kivy canvas.
+        :return:
+        """
+
+        self.create_character()
+
+        with canvas:
+            Color(1, 1, 1)
+            x, y = self.coordinates["characters"][0]
+            object_character = Rectangle(
+                pos=(x, y),
+                size=(self.object_size, self.object_size)
+            )
+            self.objects["character"] = object_character
 
     def create_obstacles(self) -> None:
         """
@@ -19,13 +55,13 @@ class MineGenerator:
         """
 
         while True:
-            x = random.randint(0, self.map_size // self.object_size - 1) * self.object_size
-            y = random.randint(0, self.map_size // self.object_size - 1) * self.object_size
+            x = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
+            y = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
             if (x, y) not in self.occupied_tiles:
                 self.occupied_tiles.add((x, y))
-                self.obstacles.append((x, y))
+                self.coordinates["obstacles"].append((x, y))
 
-            if len(self.obstacles) == (self.tile_amount // 2):
+            if len(self.coordinates["obstacles"]) == (self.tile_amount // 2):
                 break
 
     def draw_obstacles(self, canvas: Canvas) -> None:
@@ -39,8 +75,9 @@ class MineGenerator:
 
         with canvas:
             Color(1, 0, 0)
-            for x, y in self.obstacles:
-                Ellipse(
-                    pos=(x - self.object_size, y - self.object_size),
+            for x, y in self.coordinates["obstacles"]:
+                object_obstacle = Ellipse(
+                    pos=(x, y),
                     size=(self.object_size, self.object_size)
                 )
+                self.objects[f"obstacle_{x}_{y}"] = object_obstacle
