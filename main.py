@@ -15,8 +15,11 @@ __status__ = "Development"
 from kivy.app import App
 from kivy.animation import Animation
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 
+from configs import settings
+from pages.game_page.game_be import GameBE
 from pages.menu_page.menu_be import MenuBE
 from pages.splash_page.splash_be import SplashBE
 
@@ -27,11 +30,11 @@ class SplashScreen(Screen):
 
     @staticmethod
     def skip(dt):
-        screen.switch_to(screens[1])
+        screen.switch_to(initial_screens[1])
 
     def on_enter(self, *args):
-        Clock.schedule_once(self.skip, 2)
-        fade_animation = Animation(opacity=1, duration=1) + Animation(opacity=0, duration=1)
+        Clock.schedule_once(self.skip, 3)
+        fade_animation = Animation(opacity=1, duration=1.5) + Animation(opacity=0, duration=1.5)
         fade_animation.start(self.ids["image_logo"])
 
 
@@ -40,19 +43,38 @@ class MenuScreen(Screen):
     menu_screen.load_design()
 
     def on_quit(self):
-        self.menu_screen.on_quit()
+        self.menu_screen.stop_app()
+
+    def on_start(self):
+        self.menu_screen.change_page(screen, GameScreen(name=GameScreen.__name__))
 
 
-screens = [
+class GameScreen(Screen):
+    game_screen = GameBE()
+    game_screen.load_design()
+
+    def on_pre_enter(self, *args):
+        self.game_screen.initialize_map(self.canvas)
+
+
+initial_screens = [
     SplashScreen(name=SplashScreen.__class__.__name__),
     MenuScreen(name=MenuScreen.__class__.__name__),
 ]
 
 screen = ScreenManager(transition=FadeTransition())
-screen.add_widget(screens[0])
+screen.add_widget(initial_screens[0])
 
 
 class TreasureMineApp(App):
+    Window.title = settings.app_name
+    Window.icon = settings.app_icon
+
+    if settings.is_production:
+        Window.fullscreen = "auto"
+    else:
+        Window.fullscreen = False
+
     def build(self):
         screen.current = SplashScreen.__class__.__name__
         return screen

@@ -5,13 +5,20 @@
         Image:
             id: image_logo
             source: "static/images/logo.png"
-            size_hint_y: .15
+            size_hint_y: .1
             pos_hint: {"center_x": .5, "center_y": .75}
             allow_stretch: True
 
         Button:
+            id: button_start
+            text: "START"
+            size_hint_y: .1
+            pos_hint: {"center_x": .5, "center_y": .5}
+            on_release: root.on_start()
+
+        Button:
             id: button_quit
             text: "QUIT"
-            size_hint_y: .15
+            size_hint_y: .1
             pos_hint: {"center_x": .5, "center_y": .25}
             on_release: root.on_quit()
