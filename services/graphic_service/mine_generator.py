@@ -6,15 +6,29 @@ from kivy.graphics import Canvas, Color, Ellipse, Rectangle
 
 class MineGenerator:
     max_width, max_height = Window.width, Window.height
-    map_size = min(max_width, max_height)
+    map_size = max_width * 0.8, max_height
     tile_amount = 50
-    object_size = map_size // tile_amount
+    object_size = min(map_size) // tile_amount
     occupied_tiles = set()
     objects = {}
     coordinates = {
         "characters": [],
         "obstacles": []
     }
+
+    def draw_right_bar(self, canvas: Canvas) -> None:
+        """
+        Creates visual elements on screen's right side for in-game buttons.
+        :param canvas: Kivy canvas.
+        :return:
+        """
+
+        with canvas.before:
+            Color(0.128, 0.128, 0.128, 1)
+            Rectangle(
+                pos=(self.map_size[0] + self.object_size, 0),
+                size=(self.max_width - self.map_size[0] - self.object_size, self.max_height)
+            )
 
     def create_character(self) -> None:
         """
@@ -23,8 +37,8 @@ class MineGenerator:
         """
 
         while True:
-            x = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
-            y = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
+            x = random.randint(1, self.map_size[0] // self.object_size - 1) * self.object_size
+            y = random.randint(1, self.map_size[1] // self.object_size - 1) * self.object_size
             if (x, y) not in self.occupied_tiles:
                 self.occupied_tiles.add((x, y))
                 self.coordinates["characters"].append((x, y))
@@ -55,8 +69,8 @@ class MineGenerator:
         """
 
         while True:
-            x = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
-            y = random.randint(1, self.map_size // self.object_size - 1) * self.object_size
+            x = random.randint(1, self.map_size[0] // self.object_size - 1) * self.object_size
+            y = random.randint(1, self.map_size[1] // self.object_size - 1) * self.object_size
             if (x, y) not in self.occupied_tiles:
                 self.occupied_tiles.add((x, y))
                 self.coordinates["obstacles"].append((x, y))
@@ -80,4 +94,4 @@ class MineGenerator:
                     pos=(x, y),
                     size=(self.object_size, self.object_size)
                 )
-                self.objects[f"obstacle_{x}_{y}"] = object_obstacle
+                self.objects[f"obstacle_{x}_{y}"] = {"obstacle": object_obstacle, "health": 100}

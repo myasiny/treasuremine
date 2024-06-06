@@ -51,7 +51,6 @@ class MenuScreen(Screen):
 
 class GameScreen(Screen):
     game_screen = GameBE()
-    game_screen.load_design()
 
     touch_x, touch_y = None, None
 
@@ -64,6 +63,9 @@ class GameScreen(Screen):
     def on_touch_down(self, touch):
         self.touch_x, self.touch_y = touch.x, touch.y
         Clock.schedule_interval(self.on_move, 0.05)
+
+    def on_touch_move(self, touch):
+        self.touch_x, self.touch_y = touch.x, touch.y
 
     def on_touch_up(self, touch):
         Clock.unschedule(self.on_move)
