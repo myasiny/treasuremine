@@ -1,9 +1,11 @@
 import random
 
+from kivy import Logger
+
 
 class ActionGenerator:
     @staticmethod
-    def check_collision(object_obstacles: dict, new_x: int, new_y: int, object_size: int) -> bool:
+    def _check_collision(object_obstacles: dict, new_x: int, new_y: int, object_size: int) -> bool:
         """
         Determines whether new position of the character is occupied by any obstacle.
         :param object_obstacles: All obstacle objects on screen.
@@ -20,7 +22,7 @@ class ActionGenerator:
         return False
 
     @staticmethod
-    def get_collided_obstacles(object_obstacles: dict, character_x: int, character_y: int, object_size: int) -> list:
+    def _get_collided_obstacles(object_obstacles: dict, character_x: int, character_y: int, object_size: int) -> list:
         """
         Returns list of the obstacles that the coordinates collide with.
         :param object_obstacles: All obstacle objects on screen.
@@ -59,15 +61,17 @@ class ActionGenerator:
 
             if 0 <= x < map_size[0] and 0 <= y < map_size[1]:
                 object_obstacles = {k: v for k, v in objects.items() if k != "character"}
-                if not self.check_collision(object_obstacles, x, y, object_size):
+                if not self._check_collision(object_obstacles, x, y, object_size):
                     object_character.pos = x, y
+
+                    Logger.info(f'Action Generator: Move player to {x}, {y}')
 
     def hit_obstacle(self,
                      objects: dict,
                      character_x: int,
                      character_y: int,
                      object_size: int,
-                     pickaxe_power: tuple) -> list:
+                     pickaxe_power: tuple) -> tuple:
         """
         Applies damage to the obstacles next to the coordinates.
         :param objects: All objects on screen.
@@ -75,20 +79,23 @@ class ActionGenerator:
         :param character_y: Y coordinate of character.
         :param object_size: Tile size.
         :param pickaxe_power: Range of the pickaxe power.
-        :return: List of visual elements.
+        :return: Lists of hit damages and visual elements.
         """
 
-        removed_obstacles = []
+        hit_damages, removed_obstacles = [], []
         object_obstacles = {k: v for k, v in objects.items() if k != "character"}
-        collided_obstacles = self.get_collided_obstacles(object_obstacles, character_x, character_y, object_size)
+        collided_obstacles = self._get_collided_obstacles(object_obstacles, character_x, character_y, object_size)
         if len(collided_obstacles) > 0:
             for i in collided_obstacles:
-                obstacle_health = objects[i]["health"]
                 hit_damage = random.randint(pickaxe_power[0], pickaxe_power[1])
+                hit_damages.append(hit_damage)
+                obstacle_health = objects[i]["health"]
                 new_health = obstacle_health - hit_damage
                 if new_health > 0:
                     objects[i]["health"] = new_health
                 else:
                     removed_obstacles.append(objects[i]["obstacle"])
                     del objects[i]
-        return removed_obstacles
+
+                Logger.info(f'Action Generator: Hit {i} ({obstacle_health}) by {hit_damage}')
+        return hit_damages, removed_obstacles

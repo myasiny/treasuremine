@@ -1,5 +1,8 @@
 import random
 
+from kivy import Logger
+from kivy.animation import Animation
+from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivy.graphics import Canvas, Color, Ellipse, Rectangle
 
@@ -15,7 +18,7 @@ class MineGenerator:
         "obstacles": []
     }
 
-    def generate_x_y(self) -> tuple:
+    def _generate_x_y(self) -> tuple:
         """
         Creates random coordinates.
         :return: X and y coordinates.
@@ -25,7 +28,7 @@ class MineGenerator:
         y = random.randint(1, self.map_size[1] // self.object_size - 1) * self.object_size
         return x, y
 
-    def check_x_y(self, x: int, y: int) -> bool:
+    def _check_x_y(self, x: int, y: int) -> bool:
         """
         Determines whether the coordinates are occupied.
         :param x: X coordinate.
@@ -52,6 +55,8 @@ class MineGenerator:
                 size=(self.max_width - self.map_size[0] - self.object_size, self.max_height)
             )
 
+        Logger.info('Mine Generator: Draw right bar')
+
     def create_character(self) -> None:
         """
         Assigns random coordinates for character to be placed on.
@@ -59,10 +64,12 @@ class MineGenerator:
         """
 
         while True:
-            x, y = self.generate_x_y()
-            if not self.check_x_y(x, y):
+            x, y = self._generate_x_y()
+            if not self._check_x_y(x, y):
                 self.coordinates["character"].append((x, y))
                 break
+
+        Logger.info(f'Mine Generator: Create character at {x}, {y}')
 
     def draw_character(self, canvas: Canvas) -> None:
         """
@@ -82,6 +89,8 @@ class MineGenerator:
             )
             self.objects["character"] = object_character
 
+        Logger.info('Mine Generator: Draw character')
+
     def create_obstacles(self) -> None:
         """
         Assigns random coordinates for obstacles to be placed on.
@@ -89,12 +98,14 @@ class MineGenerator:
         """
 
         while True:
-            x, y = self.generate_x_y()
-            if not self.check_x_y(x, y):
+            x, y = self._generate_x_y()
+            if not self._check_x_y(x, y):
                 self.coordinates["obstacles"].append((x, y))
 
             if len(self.coordinates["obstacles"]) == (self.tile_amount // 2):
                 break
+
+        Logger.info(f'Mine Generator: Create {len(self.coordinates["obstacles"])} obstacles')
 
     def draw_obstacles(self, canvas: Canvas) -> None:
         """
@@ -114,10 +125,45 @@ class MineGenerator:
                 )
                 self.objects[f"obstacle_{x}_{y}"] = {"obstacle": object_obstacle, "health": 100}
 
+        Logger.info('Mine Generator: Draw obstacles')
+
+    def draw_hit_damages(self, canvas: Canvas, hit_damages: list, x: int, y: int, is_red: bool = True) -> None:
+        """
+        Creates visual elements on screen for the hit damages.
+        :param canvas: Kivy canvas.
+        :param hit_damages: List of hit damages.
+        :param x: X coordinate of character.
+        :param y: Y coordinate of character.
+        :param is_red: True for red, False for green.
+        :return:
+        """
+
+        with canvas:
+            if is_red:
+                font_color = (1, 0, 0, 0.5)
+                y -= self.object_size
+                next_y = y - self.object_size
+            else:
+                font_color = (0, 1, 0, 0.5)
+                y += self.object_size
+                next_y = y + self.object_size
+
+            for i in hit_damages:
+                label = Label(
+                    text=str(i),
+                    pos=(x, y),
+                    size=(self.object_size, self.object_size),
+                    color=font_color
+                )
+                fade_animation = Animation(y=next_y, opacity=0, duration=1)
+                fade_animation.start(label)
+
+        Logger.info('Mine Generator: Draw hit damages')
+
     @staticmethod
     def remove_obstacles(canvas: Canvas, removed_obstacles: list) -> None:
         """
-        Deletes the visual elements on screen.
+        Deletes the visual elements of the obstacles from screen.
         :param canvas: Kivy canvas.
         :param removed_obstacles: List of visual elements.
         :return:
@@ -125,3 +171,5 @@ class MineGenerator:
 
         for i in removed_obstacles:
             canvas.remove(i)
+
+        Logger.info(f'Mine Generator: Remove {len(removed_obstacles)} obstacles')

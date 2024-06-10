@@ -25,5 +25,6 @@ class GameBE(BaseBE):
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
         x, y = objects["character"].pos
-        removed_obstacles = self.action_generator.hit_obstacle(objects, x, y, object_size, (50, 100))  # TODO: pickaxe power
+        hit_damages, removed_obstacles = self.action_generator.hit_obstacle(objects, x, y, object_size, (50, 100))  # TODO: pickaxe power
+        self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y)
         self.mine_generator.remove_obstacles(canvas, removed_obstacles)
