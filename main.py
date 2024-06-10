@@ -61,8 +61,11 @@ class GameScreen(Screen):
         self.game_screen.update_position(self.touch_x, self.touch_y)
 
     def on_touch_down(self, touch):
-        self.touch_x, self.touch_y = touch.x, touch.y
-        Clock.schedule_interval(self.on_move, 0.05)
+        if not touch.is_double_tap:
+            self.touch_x, self.touch_y = touch.x, touch.y
+            Clock.schedule_interval(self.on_move, 0.05)
+        else:
+            self.game_screen.use_pickaxe(self.canvas)
 
     def on_touch_move(self, touch):
         self.touch_x, self.touch_y = touch.x, touch.y

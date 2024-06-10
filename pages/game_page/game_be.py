@@ -20,3 +20,10 @@ class GameBE(BaseBE):
         object_size = self.mine_generator.object_size
         map_size = self.mine_generator.map_size
         self.action_generator.move_player(objects, touch_x, touch_y, object_size, map_size)
+
+    def use_pickaxe(self, canvas: Canvas) -> None:
+        objects = self.mine_generator.objects
+        object_size = self.mine_generator.object_size
+        x, y = objects["character"].pos
+        removed_obstacles = self.action_generator.hit_obstacle(objects, x, y, object_size, (50, 100))  # TODO: pickaxe power
+        self.mine_generator.remove_obstacles(canvas, removed_obstacles)
