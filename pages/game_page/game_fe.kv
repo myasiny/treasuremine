@@ -1,0 +1,46 @@
+<ItemImage@FloatLayout>:
+    image_source: ''
+    size_hint: .05, .5
+    pos_hint: {"center_x": .5, "center_y": .5}
+
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 0.5
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    Image:
+        source: root.image_source
+        size: root.size
+        pos: root.pos
+
+<GameScreen>:
+    FloatLayout:
+        id: layout_bar
+        size_hint_y: .1
+        pos_hint: {"top": 1}
+
+        canvas.before:
+            Color:
+                rgba: 0.5, 0.5, 0.5, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+
+        Button:
+            id: button_pause
+            text: "MENU"
+            size_hint: .1, .075
+            pos_hint: {"center_x": .1, "center_y": .5}
+
+        ItemImage:
+            id: item_pickaxe
+            image_source: "static/images/item_pickaxe.png"
+            pos_hint: {"center_x": .3, "center_y": .5}
+
+        ItemImage:
+            id: item_sword
+            image_source: "static/images/item_sword.png"
+            pos_hint: {"center_x": .4, "center_y": .5}
+

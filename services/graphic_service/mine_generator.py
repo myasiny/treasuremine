@@ -4,12 +4,12 @@ from kivy import Logger
 from kivy.animation import Animation
 from kivy.uix.label import Label
 from kivy.core.window import Window
-from kivy.graphics import Canvas, Color, Ellipse, Rectangle
+from kivy.graphics import Canvas, Color, Ellipse, Rectangle, Line
 
 
 class MineGenerator:
     max_width, max_height = Window.width, Window.height
-    map_size = max_width * 0.8, max_height
+    map_size = max_width, max_height * 0.9
     tile_amount = 50
     object_size = min(map_size) // tile_amount
     objects = {}
@@ -40,22 +40,6 @@ class MineGenerator:
         for i in list(self.coordinates.values()):
             occupied_tiles.extend(i)
         return (x, y) in occupied_tiles
-
-    def draw_right_bar(self, canvas: Canvas) -> None:
-        """
-        Creates visual elements on screen's right side for in-game buttons.
-        :param canvas: Kivy canvas.
-        :return:
-        """
-
-        with canvas.before:
-            Color(0.128, 0.128, 0.128, 1)
-            Rectangle(
-                pos=(self.map_size[0] + self.object_size, 0),
-                size=(self.max_width - self.map_size[0] - self.object_size, self.max_height)
-            )
-
-        Logger.info('Mine Generator: Draw right bar')
 
     def create_character(self) -> None:
         """
@@ -127,19 +111,19 @@ class MineGenerator:
 
         Logger.info('Mine Generator: Draw obstacles')
 
-    def draw_hit_damages(self, canvas: Canvas, hit_damages: list, x: int, y: int, is_red: bool = True) -> None:
+    def draw_hit_damages(self, canvas: Canvas, hit_damages: list, x: int, y: int, is_received: bool = True) -> None:
         """
         Creates visual elements on screen for the hit damages.
         :param canvas: Kivy canvas.
         :param hit_damages: List of hit damages.
         :param x: X coordinate of character.
         :param y: Y coordinate of character.
-        :param is_red: True for red, False for green.
+        :param is_received: True for received damage, False for given damage.
         :return:
         """
 
         with canvas:
-            if is_red:
+            if is_received:
                 font_color = (1, 0, 0, 0.5)
                 y -= self.object_size
                 next_y = y - self.object_size
@@ -173,3 +157,21 @@ class MineGenerator:
             canvas.remove(i)
 
         Logger.info(f'Mine Generator: Remove {len(removed_obstacles)} obstacles')
+
+    @staticmethod
+    def draw_item_selection(new_item, old_item) -> None:
+        """
+        Creates visual element on screen for the selected item.
+        :param new_item: Kivy item image that is currently selected.
+        :param old_item: Kivy item image that is previously selected.
+        :return:
+        """
+
+        with new_item.canvas.after:
+            Color(0, 1, 0, 1)
+            Line(rectangle=(new_item.x, new_item.y, new_item.width, new_item.height), width=2)
+
+        if old_item is not None:
+            old_item.canvas.after.clear()
+
+        Logger.info('Mine Generator: Draw item selection')
