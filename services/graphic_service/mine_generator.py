@@ -18,7 +18,8 @@ class MineGenerator:
     objects = {}
     coordinates = {
         "character": [],
-        "obstacles": []
+        "obstacles": [],
+        "exit": []
     }
 
     def _generate_x_y(self) -> tuple:
@@ -29,7 +30,7 @@ class MineGenerator:
 
         x = random.randint(1, self.map_size[0] // self.object_size - 1) * self.object_size
         y = random.randint(1, self.map_size[1] // self.object_size - 1) * self.object_size
-        return x, y
+        return int(x), int(y)
 
     def _check_x_y(self, x: int, y: int) -> bool:
         """
@@ -67,6 +68,24 @@ class MineGenerator:
         button_close.bind(on_press=menu_popup.dismiss)
 
         Logger.info('Mine Generator: Draw pop-up menu')
+
+    @staticmethod
+    def draw_item_selection(new_item, old_item) -> None:
+        """
+        Creates visual element on screen for the selected item.
+        :param new_item: Kivy item image that is currently selected.
+        :param old_item: Kivy item image that is previously selected.
+        :return:
+        """
+
+        with new_item.canvas.after:
+            Color(0, 1, 0, 1)
+            Line(rectangle=(new_item.x, new_item.y, new_item.width, new_item.height), width=2)
+
+        if old_item is not None:
+            old_item.canvas.after.clear()
+
+        Logger.info('Mine Generator: Draw item selection')
 
     def create_character(self) -> None:
         """
@@ -128,8 +147,16 @@ class MineGenerator:
         self.create_obstacles()
 
         with canvas:
-            Color(1, 0, 0)
-            for x, y in self.coordinates["obstacles"]:
+            for i, (x, y) in enumerate(self.coordinates["obstacles"]):
+                if i == 0:
+                    Color(0, 0, 1)
+                    Rectangle(
+                        pos=(x, y),
+                        size=(self.object_size, self.object_size)
+                    )
+                    self.coordinates["exit"].append((x, y))
+
+                Color(1, 0, 0)
                 object_obstacle = Ellipse(
                     pos=(x, y),
                     size=(self.object_size, self.object_size)
@@ -184,21 +211,3 @@ class MineGenerator:
             canvas.remove(i)
 
         Logger.info(f'Mine Generator: Remove {len(removed_obstacles)} obstacles')
-
-    @staticmethod
-    def draw_item_selection(new_item, old_item) -> None:
-        """
-        Creates visual element on screen for the selected item.
-        :param new_item: Kivy item image that is currently selected.
-        :param old_item: Kivy item image that is previously selected.
-        :return:
-        """
-
-        with new_item.canvas.after:
-            Color(0, 1, 0, 1)
-            Line(rectangle=(new_item.x, new_item.y, new_item.width, new_item.height), width=2)
-
-        if old_item is not None:
-            old_item.canvas.after.clear()
-
-        Logger.info('Mine Generator: Draw item selection')

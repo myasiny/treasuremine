@@ -7,6 +7,17 @@ class ActionGenerator:
     active_item, active_item_power = None, None
 
     @staticmethod
+    def _check_exit(exit_coordinates: tuple, new_coordinates: tuple) -> bool:
+        """
+        Determines whether new position of the character is matched with the exit.
+        :param exit_coordinates: Coordinate for the exit.
+        :param new_coordinates: Coordinate for the character to be placed on.
+        :return: True for match, False otherwise.
+        """
+
+        return exit_coordinates == new_coordinates
+
+    @staticmethod
     def _check_collision(object_obstacles: dict, new_x: int, new_y: int, object_size: int) -> bool:
         """
         Determines whether new position of the character is occupied by any obstacle.
@@ -41,7 +52,13 @@ class ActionGenerator:
                 collided_obstacles.append(i)
         return collided_obstacles
 
-    def move_player(self, objects: dict, touch_x: int, touch_y: int, object_size: int, map_size: tuple) -> None:
+    def move_player(self,
+                    objects: dict,
+                    touch_x: int,
+                    touch_y: int,
+                    object_size: int,
+                    map_size: tuple,
+                    exit_coordinates: tuple) -> bool:
         """
         Positions visual element of the character into the new coordinates.
         :param objects: All objects on screen.
@@ -49,7 +66,8 @@ class ActionGenerator:
         :param touch_y: Y coordinate of touch event.
         :param object_size: Tile size.
         :param map_size: Maximum coordinates on screen.
-        :return:
+        :param exit_coordinates: Coordinates for the exit.
+        :return: True for exit, False otherwise.
         """
 
         if 0 <= touch_x < map_size[0] and 0 <= touch_y < map_size[1]:
@@ -67,6 +85,9 @@ class ActionGenerator:
                     object_character.pos = x, y
 
                     Logger.info(f'Action Generator: Move player to {x}, {y}')
+
+                    return self._check_exit(exit_coordinates, (x, y))
+        return False
 
     def hit_obstacle(self,
                      objects: dict,

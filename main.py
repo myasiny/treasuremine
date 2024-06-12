@@ -41,7 +41,7 @@ class SplashScreen(Screen):
     def on_enter(self, *args):
         Clock.schedule_once(self.skip, 3)
         fade_animation = Animation(opacity=1, duration=1.5) + Animation(opacity=0, duration=1.5)
-        fade_animation.start(self.ids["image_logo"])
+        fade_animation.start(self.ids.image_logo)
 
 
 class MenuScreen(Screen):
@@ -66,7 +66,7 @@ class GameScreen(Screen):
 
     def on_enter(self, *args):
         item_pickaxe = self.ids.item_pickaxe
-        self.game_screen.select_tool(item_pickaxe, None, ItemType.PICKAXE)
+        self.game_screen.select_tool(item_pickaxe, None, ItemType.BASIC_PICKAXE)
 
     def on_move(self, dt):
         self.game_screen.update_position(self.touch_x, self.touch_y)
@@ -79,9 +79,9 @@ class GameScreen(Screen):
         if button_pause.collide_point(*touch.pos):
             self.game_screen.select_menu(self)
         elif item_pickaxe.collide_point(*touch.pos):
-            self.game_screen.select_tool(item_pickaxe, item_sword, ItemType.PICKAXE)
+            self.game_screen.select_tool(item_pickaxe, item_sword, ItemType.BASIC_PICKAXE)
         elif item_sword.collide_point(*touch.pos):
-            self.game_screen.select_tool(item_sword, item_pickaxe, ItemType.SWORD)
+            self.game_screen.select_tool(item_sword, item_pickaxe, ItemType.BASIC_SWORD)
         else:
             if not touch.is_double_tap:
                 self.touch_x, self.touch_y = touch.x, touch.y
