@@ -24,16 +24,29 @@ class GameBE(BaseBE):
         map_size = self.mine_generator.map_size
         self.action_generator.move_player(objects, touch_x, touch_y, object_size, map_size)
 
+    def select_menu(self, root) -> None:
+        self.mine_generator.draw_popup_menu(root)
+
     def select_tool(self, new_item, old_item, item_type: ItemType) -> None:
         current_item = self.action_generator.active_item
         if new_item != current_item:
             self.mine_generator.draw_item_selection(new_item, old_item)
             self.action_generator.active_item = item_type
+            self.action_generator.active_item_power = (50, 90)  # TODO: item power
 
-    def use_pickaxe(self, canvas: Canvas) -> None:
+    def use_tool(self, canvas: Canvas) -> None:
+        active_item = self.action_generator.active_item
+        active_item_power = self.action_generator.active_item_power
+
+        if active_item == ItemType.PICKAXE:
+            self.use_pickaxe(canvas, active_item_power)
+        else:
+            pass  # TODO: sword
+
+    def use_pickaxe(self, canvas: Canvas, pickaxe_power: tuple) -> None:
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
         x, y = objects["character"].pos
-        hit_damages, removed_obstacles = self.action_generator.hit_obstacle(objects, x, y, object_size, (50, 100))  # TODO: pickaxe power
+        hit_damages, removed_obstacles = self.action_generator.hit_obstacle(objects, x, y, object_size, pickaxe_power)
         self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y, is_received=False)
         self.mine_generator.remove_obstacles(canvas, removed_obstacles)

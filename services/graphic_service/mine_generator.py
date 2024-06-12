@@ -2,9 +2,12 @@ import random
 
 from kivy import Logger
 from kivy.animation import Animation
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivy.graphics import Canvas, Color, Ellipse, Rectangle, Line
+from kivy.uix.popup import Popup
 
 
 class MineGenerator:
@@ -40,6 +43,30 @@ class MineGenerator:
         for i in list(self.coordinates.values()):
             occupied_tiles.extend(i)
         return (x, y) in occupied_tiles
+
+    @staticmethod
+    def draw_popup_menu(root) -> None:
+        """
+        Creates visual element on screen for the pop-up menu.
+        :param root: Kivy root.
+        :return:
+        """
+
+        layout_box = BoxLayout(orientation="vertical")
+
+        button_quit = Button(text="QUIT")
+        layout_box.add_widget(button_quit)
+
+        button_close = Button(text="CLOSE")
+        layout_box.add_widget(button_close)
+
+        menu_popup = Popup(title="POP-UP MENU", content=layout_box, size_hint=(.5, .5))
+        menu_popup.open()
+
+        button_quit.bind(on_press=root.on_quit)
+        button_close.bind(on_press=menu_popup.dismiss)
+
+        Logger.info('Mine Generator: Draw pop-up menu')
 
     def create_character(self) -> None:
         """

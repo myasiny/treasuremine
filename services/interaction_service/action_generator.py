@@ -4,7 +4,7 @@ from kivy import Logger
 
 
 class ActionGenerator:
-    active_item = None
+    active_item, active_item_power = None, None
 
     @staticmethod
     def _check_collision(object_obstacles: dict, new_x: int, new_y: int, object_size: int) -> bool:

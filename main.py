@@ -48,11 +48,11 @@ class MenuScreen(Screen):
     menu_screen = MenuBE()
     menu_screen.load_design()
 
-    def on_quit(self):
-        self.menu_screen.stop_app()
-
     def on_start(self):
         self.menu_screen.change_page(screen, GameScreen(name=GameScreen.__name__))
+
+    def on_quit(self):
+        self.menu_screen.stop_app()
 
 
 class GameScreen(Screen):
@@ -77,7 +77,7 @@ class GameScreen(Screen):
         item_sword = self.ids.item_sword
 
         if button_pause.collide_point(*touch.pos):
-            pass  # TODO: popup menu
+            self.game_screen.select_menu(self)
         elif item_pickaxe.collide_point(*touch.pos):
             self.game_screen.select_tool(item_pickaxe, item_sword, ItemType.PICKAXE)
         elif item_sword.collide_point(*touch.pos):
@@ -87,13 +87,16 @@ class GameScreen(Screen):
                 self.touch_x, self.touch_y = touch.x, touch.y
                 Clock.schedule_interval(self.on_move, 0.05)
             else:
-                self.game_screen.use_pickaxe(self.canvas)  # TODO: sword
+                self.game_screen.use_tool(self.canvas)
 
     def on_touch_move(self, touch):
         self.touch_x, self.touch_y = touch.x, touch.y
 
     def on_touch_up(self, touch):
         Clock.unschedule(self.on_move)
+
+    def on_quit(self, *args):
+        self.game_screen.stop_app()
 
 
 initial_screens = [
