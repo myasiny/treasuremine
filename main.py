@@ -69,7 +69,7 @@ class GameScreen(Screen):
         self.game_screen.select_tool(item_pickaxe, None, ItemType.BASIC_PICKAXE)
 
     def on_move(self, dt):
-        self.game_screen.update_position(self.touch_x, self.touch_y)
+        self.game_screen.update_position(self, self.touch_x, self.touch_y)
 
     def on_touch_down(self, touch):
         button_pause = self.ids.button_pause
@@ -77,7 +77,7 @@ class GameScreen(Screen):
         item_sword = self.ids.item_sword
 
         if button_pause.collide_point(*touch.pos):
-            self.game_screen.select_menu(self)
+            self.game_screen.select_menu(self, is_exit=False)
         elif item_pickaxe.collide_point(*touch.pos):
             self.game_screen.select_tool(item_pickaxe, item_sword, ItemType.BASIC_PICKAXE)
         elif item_sword.collide_point(*touch.pos):
@@ -94,6 +94,14 @@ class GameScreen(Screen):
 
     def on_touch_up(self, touch):
         Clock.unschedule(self.on_move)
+
+    def on_complete(self):
+        Clock.unschedule(self.on_move)
+        self.game_screen.select_menu(self, is_exit=True)
+
+    def on_next(self, *args):
+        self.canvas.after.clear()
+        self.on_pre_enter()
 
     def on_quit(self, *args):
         self.game_screen.stop_app()

@@ -16,20 +16,24 @@ class GameBE(BaseBE):
         self.action_generator = ActionGenerator()
 
     def initialize_map(self, canvas: Canvas) -> None:
+        self.mine_generator.initialize_objects()
         self.mine_generator.draw_character(canvas)
         self.mine_generator.draw_obstacles(canvas)
 
-    def update_position(self, touch_x: int, touch_y: int) -> None:
+    def update_position(self, root, touch_x: int, touch_y: int) -> None:
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
         map_size = self.mine_generator.map_size
         exit_coordinates = self.mine_generator.coordinates["exit"][0]
         is_exit = self.action_generator.move_player(objects, touch_x, touch_y, object_size, map_size, exit_coordinates)
         if is_exit:
-            print("DONE")  # TODO: complete game
+            root.on_complete()
 
-    def select_menu(self, root) -> None:
-        self.mine_generator.draw_popup_menu(root)
+    def select_menu(self, root, is_exit: bool = False) -> None:
+        if is_exit:
+            self.mine_generator.draw_exit_menu(root)
+        else:
+            self.mine_generator.draw_popup_menu(root)
 
     def select_tool(self, new_item, old_item, item_type: ItemType) -> None:
         current_item = self.action_generator.active_item

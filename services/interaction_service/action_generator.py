@@ -7,15 +7,15 @@ class ActionGenerator:
     active_item, active_item_power = None, None
 
     @staticmethod
-    def _check_exit(exit_coordinates: tuple, new_coordinates: tuple) -> bool:
+    def _check_exit(exit_coordinates: tuple, coordinates: tuple) -> bool:
         """
         Determines whether new position of the character is matched with the exit.
-        :param exit_coordinates: Coordinate for the exit.
-        :param new_coordinates: Coordinate for the character to be placed on.
+        :param exit_coordinates: Coordinates for the exit.
+        :param coordinates: Coordinates for the character.
         :return: True for match, False otherwise.
         """
 
-        return exit_coordinates == new_coordinates
+        return exit_coordinates == coordinates
 
     @staticmethod
     def _check_collision(object_obstacles: dict, new_x: int, new_y: int, object_size: int) -> bool:

@@ -15,12 +15,7 @@ class MineGenerator:
     map_size = max_width, max_height * 0.9
     tile_amount = 50
     object_size = min(map_size) // tile_amount
-    objects = {}
-    coordinates = {
-        "character": [],
-        "obstacles": [],
-        "exit": []
-    }
+    objects, coordinates = None, None
 
     def _generate_x_y(self) -> tuple:
         """
@@ -44,6 +39,39 @@ class MineGenerator:
         for i in list(self.coordinates.values()):
             occupied_tiles.extend(i)
         return (x, y) in occupied_tiles
+
+    def initialize_objects(self):
+        self.objects = {}
+        self.coordinates = {
+            "character": [],
+            "obstacles": [],
+            "exit": []
+        }
+
+    @staticmethod
+    def draw_exit_menu(root) -> None:
+        """
+        Creates visual element on screen for the exit menu.
+        :param root: Kivy root.
+        :return:
+        """
+
+        layout_box = BoxLayout(orientation="vertical")
+
+        button_next = Button(text="NEXT")
+        layout_box.add_widget(button_next)
+
+        button_quit = Button(text="QUIT")
+        layout_box.add_widget(button_quit)
+
+        menu_exit = Popup(title="EXIT MENU", content=layout_box, size_hint=(.5, .5), auto_dismiss=False)
+        menu_exit.open()
+
+        button_next.bind(on_press=menu_exit.dismiss)
+        button_next.bind(on_press=root.on_next)
+        button_quit.bind(on_press=root.on_quit)
+
+        Logger.info('Mine Generator: Draw exit menu')
 
     @staticmethod
     def draw_popup_menu(root) -> None:
@@ -110,7 +138,7 @@ class MineGenerator:
 
         self.create_character()
 
-        with canvas:
+        with canvas.after:
             Color(1, 1, 1)
             x, y = self.coordinates["character"][0]
             object_character = Rectangle(
@@ -146,7 +174,7 @@ class MineGenerator:
 
         self.create_obstacles()
 
-        with canvas:
+        with canvas.after:
             for i, (x, y) in enumerate(self.coordinates["obstacles"]):
                 if i == 0:
                     Color(0, 0, 1)
@@ -176,7 +204,7 @@ class MineGenerator:
         :return:
         """
 
-        with canvas:
+        with canvas.after:
             if is_received:
                 font_color = (1, 0, 0, 0.5)
                 y -= self.object_size
@@ -208,6 +236,6 @@ class MineGenerator:
         """
 
         for i in removed_obstacles:
-            canvas.remove(i)
+            canvas.after.remove(i)
 
         Logger.info(f'Mine Generator: Remove {len(removed_obstacles)} obstacles')
