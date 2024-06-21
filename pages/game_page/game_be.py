@@ -19,6 +19,7 @@ class GameBE(BaseBE):
         self.mine_generator.initialize_objects()
         self.mine_generator.draw_character(canvas)
         self.mine_generator.draw_obstacles(canvas)
+        self.mine_generator.draw_creatures(canvas)
 
     def update_position(self, root, touch_x: int, touch_y: int) -> None:
         objects = self.mine_generator.objects
@@ -47,17 +48,16 @@ class GameBE(BaseBE):
         active_item_power = self.action_generator.active_item_power
 
         if active_item.value == ItemClass.PICKAXE:
-            self.use_pickaxe(canvas, active_item_power)
+            self.apply_damage(canvas, active_item_power, is_pickaxe=True)
         elif active_item.value == ItemClass.SWORD:
-            self.use_sword(canvas, active_item_power)
+            self.apply_damage(canvas, active_item_power, is_pickaxe=False)
 
-    def use_pickaxe(self, canvas: Canvas, pickaxe_power: tuple) -> None:
+    def apply_damage(self, canvas: Canvas, tool_power: tuple, is_pickaxe: bool) -> None:
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
         x, y = objects["character"].pos
-        hit_damages, removed_obstacles = self.action_generator.hit_obstacle(objects, x, y, object_size, pickaxe_power)
+        hit_damages, removed_objects = self.action_generator.hit_object(
+            objects, x, y, object_size, tool_power, is_obstacle=is_pickaxe
+        )
         self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y, is_received=False)
-        self.mine_generator.remove_obstacles(canvas, removed_obstacles)
-
-    def use_sword(self, canvas: Canvas, sword_power: tuple) -> None:
-        pass  # TODO: sword hit
+        self.mine_generator.remove_objects(canvas, removed_objects)

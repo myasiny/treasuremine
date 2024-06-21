@@ -18,39 +18,39 @@ class ActionGenerator:
         return exit_coordinates == coordinates
 
     @staticmethod
-    def _check_collision(object_obstacles: dict, new_x: int, new_y: int, object_size: int) -> bool:
+    def _check_collision(all_objects: dict, new_x: int, new_y: int, object_size: int) -> bool:
         """
-        Determines whether new position of the character is occupied by any obstacle.
-        :param object_obstacles: All obstacle objects on screen.
+        Determines whether new position of the character is occupied by any object.
+        :param all_objects: All objects on screen.
         :param new_x: X coordinate for the character to be placed on.
         :param new_y: Y coordinate for the character to be placed on.
         :param object_size: Tile size.
         :return: True for collision, False otherwise.
         """
 
-        for i in list(object_obstacles.keys()):
+        for i in list(all_objects.keys()):
             x, y = int(float(i.split("_")[1])), int(float(i.split("_")[2]))
             if abs(new_x - x) < object_size and abs(new_y - y) < object_size:
                 return True
         return False
 
     @staticmethod
-    def _get_collided_obstacles(object_obstacles: dict, character_x: int, character_y: int, object_size: int) -> list:
+    def _get_collided_objects(all_objects: dict, character_x: int, character_y: int, object_size: int) -> list:
         """
-        Returns list of the obstacles that the coordinates collide with.
-        :param object_obstacles: All obstacle objects on screen.
+        Returns list of the objects that the coordinates collide with.
+        :param all_objects: All objects on screen.
         :param character_x: X coordinate of character.
         :param character_y: Y coordinate of character.
         :param object_size: Tile size.
-        :return: List of obstacle ids.
+        :return: List of object ids.
         """
 
-        collided_obstacles = []
-        for i in list(object_obstacles.keys()):
+        collided_objects = []
+        for i in list(all_objects.keys()):
             x, y = int(float(i.split("_")[1])), int(float(i.split("_")[2]))
             if abs(character_x - x) < object_size * 2 and abs(character_y - y) < object_size * 2:
-                collided_obstacles.append(i)
-        return collided_obstacles
+                collided_objects.append(i)
+        return collided_objects
 
     def move_player(self,
                     objects: dict,
@@ -80,8 +80,8 @@ class ActionGenerator:
                 y += ((diff_y > 0) - (diff_y < 0)) * object_size
 
             if 0 <= x < map_size[0] and 0 <= y < map_size[1]:
-                object_obstacles = {k: v for k, v in objects.items() if k != "character"}
-                if not self._check_collision(object_obstacles, x, y, object_size):
+                all_objects = {k: v for k, v in objects.items() if "obstacle" in k or "creature" in k}
+                if not self._check_collision(all_objects, x, y, object_size):
                     object_character.pos = x, y
 
                     Logger.info(f'Action Generator: Move player to {x}, {y}')
@@ -89,36 +89,39 @@ class ActionGenerator:
                     return self._check_exit(exit_coordinates, (x, y))
         return False
 
-    def hit_obstacle(self,
-                     objects: dict,
-                     character_x: int,
-                     character_y: int,
-                     object_size: int,
-                     pickaxe_power: tuple) -> tuple:
+    def hit_object(self,
+                   objects: dict,
+                   character_x: int,
+                   character_y: int,
+                   object_size: int,
+                   tool_power: tuple,
+                   is_obstacle: bool) -> tuple:
         """
-        Applies damage to the obstacles next to the coordinates.
+        Damages the objects next to the coordinates.
         :param objects: All objects on screen.
         :param character_x: X coordinate of character.
         :param character_y: Y coordinate of character.
         :param object_size: Tile size.
-        :param pickaxe_power: Range of the pickaxe power.
+        :param tool_power: Range of the tool power.
+        :param is_obstacle: True for obstacle, False for creature.
         :return: Lists of hit damages and visual elements.
         """
 
-        hit_damages, removed_obstacles = [], []
-        object_obstacles = {k: v for k, v in objects.items() if k != "character"}
-        collided_obstacles = self._get_collided_obstacles(object_obstacles, character_x, character_y, object_size)
-        if len(collided_obstacles) > 0:
-            for i in collided_obstacles:
-                hit_damage = random.randint(pickaxe_power[0], pickaxe_power[1])
+        hit_damages, removed_objects = [], []
+        object_key = "obstacle" if is_obstacle else "creature"
+        all_objects = {k: v for k, v in objects.items() if object_key in k}
+        collided_objects = self._get_collided_objects(all_objects, character_x, character_y, object_size)
+        if len(collided_objects) > 0:
+            for i in collided_objects:
+                hit_damage = random.randint(tool_power[0], tool_power[1])
                 hit_damages.append(hit_damage)
-                obstacle_health = objects[i]["health"]
-                new_health = obstacle_health - hit_damage
+                object_health = objects[i]["health"]
+                new_health = object_health - hit_damage
                 if new_health > 0:
                     objects[i]["health"] = new_health
                 else:
-                    removed_obstacles.append(objects[i]["obstacle"])
+                    removed_objects.append(objects[i][object_key])
                     del objects[i]
 
-                Logger.info(f'Action Generator: Hit {i} ({obstacle_health}) by {hit_damage}')
-        return hit_damages, removed_obstacles
+                Logger.info(f'Action Generator: Hit {i} ({object_health}) by {hit_damage}')
+        return hit_damages, removed_objects

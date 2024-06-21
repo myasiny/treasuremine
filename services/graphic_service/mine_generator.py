@@ -45,6 +45,7 @@ class MineGenerator:
         self.coordinates = {
             "character": [],
             "obstacles": [],
+            "creatures": [],
             "exit": []
         }
 
@@ -193,6 +194,42 @@ class MineGenerator:
 
         Logger.info('Mine Generator: Draw obstacles')
 
+    def create_creatures(self) -> None:
+        """
+        Assigns random coordinates for creatures to be placed on.
+        :return:
+        """
+
+        while True:
+            x, y = self._generate_x_y()
+            if not self._check_x_y(x, y):
+                self.coordinates["creatures"].append((x, y))
+
+            if len(self.coordinates["creatures"]) == (self.tile_amount // 3):
+                break
+
+        Logger.info(f'Mine Generator: Create {len(self.coordinates["creatures"])} creatures')
+
+    def draw_creatures(self, canvas: Canvas) -> None:
+        """
+        Creates visual elements on screen for the creatures.
+        :param canvas: Kivy canvas.
+        :return:
+        """
+
+        self.create_creatures()
+
+        with canvas.after:
+            for x, y in self.coordinates["creatures"]:
+                Color(0, 1, 1)
+                object_creature = Ellipse(
+                    pos=(x, y),
+                    size=(self.object_size, self.object_size)
+                )
+                self.objects[f"creature_{x}_{y}"] = {"creature": object_creature, "health": 150}
+
+        Logger.info('Mine Generator: Draw creatures')
+
     def draw_hit_damages(self, canvas: Canvas, hit_damages: list, x: int, y: int, is_received: bool = True) -> None:
         """
         Creates visual elements on screen for the hit damages.
@@ -227,15 +264,15 @@ class MineGenerator:
         Logger.info('Mine Generator: Draw hit damages')
 
     @staticmethod
-    def remove_obstacles(canvas: Canvas, removed_obstacles: list) -> None:
+    def remove_objects(canvas: Canvas, removed_objects: list) -> None:
         """
-        Deletes the visual elements of the obstacles from screen.
+        Deletes the visual elements of the objects from screen.
         :param canvas: Kivy canvas.
-        :param removed_obstacles: List of visual elements.
+        :param removed_objects: List of visual elements.
         :return:
         """
 
-        for i in removed_obstacles:
+        for i in removed_objects:
             canvas.after.remove(i)
 
-        Logger.info(f'Mine Generator: Remove {len(removed_obstacles)} obstacles')
+        Logger.info(f'Mine Generator: Remove {len(removed_objects)} objects')
