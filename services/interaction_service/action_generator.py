@@ -71,7 +71,7 @@ class ActionGenerator:
         """
 
         if 0 <= touch_x < map_size[0] and 0 <= touch_y < map_size[1]:
-            object_character = objects["character"]
+            object_character = objects["character_main"]["character"]
             x, y = object_character.pos
             diff_x, diff_y = touch_x - x, touch_y - y
             if abs(diff_x) > object_size:
@@ -80,7 +80,7 @@ class ActionGenerator:
                 y += ((diff_y > 0) - (diff_y < 0)) * object_size
 
             if 0 <= x < map_size[0] and 0 <= y < map_size[1]:
-                all_objects = {k: v for k, v in objects.items() if "obstacle" in k or "creature" in k}
+                all_objects = {k: v for k, v in objects.items() if "obstacle" in k}
                 if not self._check_collision(all_objects, x, y, object_size):
                     object_character.pos = x, y
 
@@ -125,3 +125,37 @@ class ActionGenerator:
 
                 Logger.info(f'Action Generator: Hit {i} ({object_health}) by {hit_damage}')
         return hit_damages, removed_objects
+
+    def hit_by_creature(self,
+                        objects: dict,
+                        character_x: int,
+                        character_y: int,
+                        object_size: int,
+                        character_health: int) -> tuple:
+        """
+        Get damages by the creatures next to the coordinates.
+        :param objects: All objects on screen.
+        :param character_x: X coordinate of character.
+        :param character_y: Y coordinate of character.
+        :param object_size: Tile size.
+        :param character_health: Health of character.
+        :return: Lists of hit damages and new health of character.
+        """
+
+        hit_damages, new_health = [], character_health
+        object_key = "creature"
+        all_objects = {k: v for k, v in objects.items() if object_key in k}
+        collided_objects = self._get_collided_objects(all_objects, character_x, character_y, object_size)
+        if len(collided_objects) > 0:
+            for i in collided_objects:
+                object_power = objects[i]["power"]
+                hit_damage = random.randint(object_power[0], object_power[1])
+                hit_damages.append(hit_damage)
+                new_health = character_health - hit_damage
+                if new_health > 0:
+                    objects["character_main"]["health"] = new_health
+                else:
+                    break
+
+                Logger.info(f'Action Generator: Receive {hit_damage} to character ({character_health})')
+        return hit_damages, new_health

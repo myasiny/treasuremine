@@ -116,6 +116,24 @@ class MineGenerator:
 
         Logger.info('Mine Generator: Draw item selection')
 
+    @staticmethod
+    def draw_health(health_bar, health: int) -> None:
+        """
+        Creates visual element on screen for the health.
+        :param health_bar: Kivy label.
+        :param health: Health of character.
+        :return:
+        """
+
+        if health > 50:
+            font_color = "36e685"
+        elif 50 >= health > 25:
+            font_color = "f6d84b"
+        else:
+            font_color = "fa0e0e"
+
+        health_bar.text = f"Health: [color={font_color}]{str(health).rjust(3)}[/color]"
+
     def create_character(self) -> None:
         """
         Assigns random coordinates for character to be placed on.
@@ -146,7 +164,7 @@ class MineGenerator:
                 pos=(x, y),
                 size=(self.object_size, self.object_size)
             )
-            self.objects["character"] = object_character
+            self.objects["character_main"] = {"character": object_character, "health": 100}
 
         Logger.info('Mine Generator: Draw character')
 
@@ -226,7 +244,7 @@ class MineGenerator:
                     pos=(x, y),
                     size=(self.object_size, self.object_size)
                 )
-                self.objects[f"creature_{x}_{y}"] = {"creature": object_creature, "health": 150}
+                self.objects[f"creature_{x}_{y}"] = {"creature": object_creature, "health": 150, "power": (5, 15)}
 
         Logger.info('Mine Generator: Draw creatures')
 

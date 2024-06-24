@@ -55,9 +55,22 @@ class GameBE(BaseBE):
     def apply_damage(self, canvas: Canvas, tool_power: tuple, is_pickaxe: bool) -> None:
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
-        x, y = objects["character"].pos
+        x, y = objects["character_main"]["character"].pos
         hit_damages, removed_objects = self.action_generator.hit_object(
             objects, x, y, object_size, tool_power, is_obstacle=is_pickaxe
         )
-        self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y, is_received=False)
-        self.mine_generator.remove_objects(canvas, removed_objects)
+        if hit_damages:
+            self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y, is_received=False)
+        if removed_objects:
+            self.mine_generator.remove_objects(canvas, removed_objects)
+
+    def get_damage(self, canvas: Canvas, health_bar):
+        objects = self.mine_generator.objects
+        object_size = self.mine_generator.object_size
+        x, y = objects["character_main"]["character"].pos
+        current_health = objects["character_main"]["health"]
+        hit_damages, new_health = self.action_generator.hit_by_creature(objects, x, y, object_size, current_health)
+        if hit_damages:
+            self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y, is_received=True)
+        if current_health != new_health:
+            self.mine_generator.draw_health(health_bar, new_health)

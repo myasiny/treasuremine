@@ -67,9 +67,14 @@ class GameScreen(Screen):
     def on_enter(self, *args):
         item_pickaxe = self.ids.item_pickaxe
         self.game_screen.select_tool(item_pickaxe, None, ItemType.BASIC_PICKAXE)
+        Clock.schedule_interval(self.on_danger, 1)
 
     def on_move(self, dt):
         self.game_screen.update_position(self, self.touch_x, self.touch_y)
+
+    def on_danger(self, dt):
+        label_health = self.ids.label_health
+        self.game_screen.get_damage(self.canvas, label_health)
 
     def on_touch_down(self, touch):
         button_pause = self.ids.button_pause
@@ -97,6 +102,7 @@ class GameScreen(Screen):
 
     def on_complete(self):
         Clock.unschedule(self.on_move)
+        Clock.unschedule(self.on_danger)
         self.game_screen.select_menu(self, is_exit=True)
 
     def on_next(self, *args):
