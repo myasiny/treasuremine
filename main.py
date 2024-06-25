@@ -35,7 +35,7 @@ class SplashScreen(Screen):
     splash_screen.load_design()
 
     @staticmethod
-    def skip(dt):
+    def skip(*args):
         screen.switch_to(initial_screens[1])
 
     def on_enter(self, *args):
@@ -64,17 +64,21 @@ class GameScreen(Screen):
     def on_pre_enter(self, *args):
         self.game_screen.initialize_map(self.canvas)
 
-    def on_enter(self, *args):
-        item_pickaxe = self.ids.item_pickaxe
-        self.game_screen.select_tool(item_pickaxe, None, ItemType.BASIC_PICKAXE)
+    def on_enter(self, **kwargs):
+        is_restart = kwargs.get("is_restart", False)
+        if not is_restart:
+            item_pickaxe = self.ids.item_pickaxe
+            self.game_screen.select_tool(item_pickaxe, None, ItemType.BASIC_PICKAXE)
+        label_health = self.ids.label_health
+        self.game_screen.mine_generator.draw_health(label_health, 100)
         Clock.schedule_interval(self.on_danger, 1)
 
-    def on_move(self, dt):
+    def on_move(self, *args):
         self.game_screen.update_position(self, self.touch_x, self.touch_y)
 
-    def on_danger(self, dt):
+    def on_danger(self, *args):
         label_health = self.ids.label_health
-        self.game_screen.get_damage(self.canvas, label_health)
+        self.game_screen.get_damage(self, self.canvas, label_health)
 
     def on_touch_down(self, touch):
         button_pause = self.ids.button_pause
@@ -100,14 +104,18 @@ class GameScreen(Screen):
     def on_touch_up(self, touch):
         Clock.unschedule(self.on_move)
 
-    def on_complete(self):
+    def on_pause(self):
         Clock.unschedule(self.on_move)
         Clock.unschedule(self.on_danger)
+
+    def on_complete(self):
+        self.on_pause()
         self.game_screen.select_menu(self, is_exit=True)
 
     def on_next(self, *args):
         self.canvas.after.clear()
         self.on_pre_enter()
+        self.on_enter(is_restart=True)
 
     def on_quit(self, *args):
         self.game_screen.stop_app()

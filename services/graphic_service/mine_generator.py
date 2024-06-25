@@ -50,16 +50,24 @@ class MineGenerator:
         }
 
     @staticmethod
-    def draw_exit_menu(root) -> None:
+    def draw_exit_menu(root, is_dead: bool) -> None:
         """
         Creates visual element on screen for the exit menu.
         :param root: Kivy root.
+        :param is_dead: True if character is dead, False otherwise.
         :return:
         """
 
+        root.on_pause()
+
         layout_box = BoxLayout(orientation="vertical")
 
-        button_next = Button(text="NEXT")
+        if not is_dead:
+            text_next = "NEXT"
+        else:
+            text_next = "RESTART"
+
+        button_next = Button(text=text_next)
         layout_box.add_widget(button_next)
 
         button_quit = Button(text="QUIT")
@@ -132,7 +140,7 @@ class MineGenerator:
         else:
             font_color = "fa0e0e"
 
-        health_bar.text = f"Health: [color={font_color}]{str(health).rjust(3)}[/color]"
+        health_bar.text = f"Health: [color={font_color}]{str(max(0, health)).rjust(3)}[/color]"
 
     def create_character(self) -> None:
         """

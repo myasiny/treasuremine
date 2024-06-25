@@ -32,7 +32,7 @@ class GameBE(BaseBE):
 
     def select_menu(self, root, is_exit: bool = False) -> None:
         if is_exit:
-            self.mine_generator.draw_exit_menu(root)
+            self.mine_generator.draw_exit_menu(root, is_dead=False)
         else:
             self.mine_generator.draw_popup_menu(root)
 
@@ -64,7 +64,7 @@ class GameBE(BaseBE):
         if removed_objects:
             self.mine_generator.remove_objects(canvas, removed_objects)
 
-    def get_damage(self, canvas: Canvas, health_bar):
+    def get_damage(self, root, canvas: Canvas, health_bar) -> None:
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
         x, y = objects["character_main"]["character"].pos
@@ -74,3 +74,5 @@ class GameBE(BaseBE):
             self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y, is_received=True)
         if current_health != new_health:
             self.mine_generator.draw_health(health_bar, new_health)
+            if new_health <= 0:
+                self.mine_generator.draw_exit_menu(root, is_dead=True)
