@@ -1,6 +1,6 @@
 <ItemImage@FloatLayout>:
     image_source: ''
-    size_hint: .05, .5
+    size_hint: .075, .5
     pos_hint: {"center_x": .5, "center_y": .5}
 
     canvas.before:
@@ -45,8 +45,27 @@
             pos_hint: {"center_x": .4, "center_y": .5}
 
         Label:
-            id: label_health
-            text: "Health: [color=36e685]100[/color]"
-            pos_hint: {"center_x": .9, "center_y": .5}
+            id: label_level_tag
+            text: "Level"
+            size_hint: .1, .2
+            pos_hint: {"center_x": .7, "center_y": .7}
+
+        Label:
+            id: label_level
+            text: "[color=36e685]1[/color]"
+            size_hint: .1, .4
+            pos_hint: {"center_x": .7, "center_y": .4}
             markup: True
 
+        Label:
+            id: label_health_tag
+            text: "Health"
+            size_hint: .1, .2
+            pos_hint: {"center_x": .9, "center_y": .7}
+
+        Label:
+            id: label_health
+            text: "[color=36e685]100[/color]"
+            size_hint: .1, .4
+            pos_hint: {"center_x": .9, "center_y": .4}
+            markup: True

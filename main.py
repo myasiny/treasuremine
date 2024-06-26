@@ -12,6 +12,7 @@ __license__ = "Apache License 2.0"
 __version__ = "0.0.1"
 __status__ = "Development"
 
+from kivy.cache import Cache
 from kivy.config import Config
 
 from enums.item_type import ItemType
@@ -62,15 +63,23 @@ class GameScreen(Screen):
     touch_x, touch_y = None, None
 
     def on_pre_enter(self, *args):
-        self.game_screen.initialize_map(self.canvas)
+        current_level = Cache.get("game", "level", default=1)
+        self.game_screen.initialize_map(self.canvas, current_level)
 
     def on_enter(self, **kwargs):
-        is_restart = kwargs.get("is_restart", False)
-        if not is_restart:
+        is_restart = kwargs.get("is_restart", True)
+        current_level = Cache.get("game", "level", default=1)
+        if is_restart:
             item_pickaxe = self.ids.item_pickaxe
             self.game_screen.select_tool(item_pickaxe, None, ItemType.BASIC_PICKAXE)
+        else:
+            current_level += 1
+
+        label_level = self.ids.label_level
         label_health = self.ids.label_health
+        self.game_screen.mine_generator.draw_level(label_level, current_level)
         self.game_screen.mine_generator.draw_health(label_health, 100)
+        Cache.append("game", "level", current_level)
         Clock.schedule_interval(self.on_danger, 1)
 
     def on_move(self, *args):
@@ -115,7 +124,7 @@ class GameScreen(Screen):
     def on_next(self, *args):
         self.canvas.after.clear()
         self.on_pre_enter()
-        self.on_enter(is_restart=True)
+        self.on_enter(is_restart=args[0] if len(args) > 0 else False)
 
     def on_quit(self, *args):
         self.game_screen.stop_app()
@@ -128,6 +137,8 @@ initial_screens = [
 
 screen = ScreenManager(transition=FadeTransition())
 screen.add_widget(initial_screens[0])
+
+Cache.register("game", limit=1)
 
 
 class TreasureMineApp(App):

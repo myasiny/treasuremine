@@ -15,8 +15,8 @@ class GameBE(BaseBE):
         self.mine_generator = MineGenerator()
         self.action_generator = ActionGenerator()
 
-    def initialize_map(self, canvas: Canvas) -> None:
-        self.mine_generator.initialize_objects()
+    def initialize_map(self, canvas: Canvas, level: int) -> None:
+        self.mine_generator.initialize_objects(level)
         self.mine_generator.draw_character(canvas)
         self.mine_generator.draw_obstacles(canvas)
         self.mine_generator.draw_creatures(canvas)

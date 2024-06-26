@@ -1,4 +1,6 @@
+import math
 import random
+from functools import partial
 
 from kivy import Logger
 from kivy.animation import Animation
@@ -13,9 +15,9 @@ from kivy.uix.popup import Popup
 class MineGenerator:
     max_width, max_height = Window.width, Window.height
     map_size = max_width, max_height * 0.9
-    tile_amount = 50
+    tile_amount = 25
     object_size = min(map_size) // tile_amount
-    objects, coordinates = None, None
+    objects, coordinates, level_multiplier = None, None, None
 
     def _generate_x_y(self) -> tuple:
         """
@@ -40,7 +42,7 @@ class MineGenerator:
             occupied_tiles.extend(i)
         return (x, y) in occupied_tiles
 
-    def initialize_objects(self):
+    def initialize_objects(self, level: int):
         self.objects = {}
         self.coordinates = {
             "character": [],
@@ -48,6 +50,7 @@ class MineGenerator:
             "creatures": [],
             "exit": []
         }
+        self.level_multiplier = int(math.log(level + 1, 2))
 
     @staticmethod
     def draw_exit_menu(root, is_dead: bool) -> None:
@@ -77,7 +80,7 @@ class MineGenerator:
         menu_exit.open()
 
         button_next.bind(on_press=menu_exit.dismiss)
-        button_next.bind(on_press=root.on_next)
+        button_next.bind(on_press=partial(root.on_next, is_dead))
         button_quit.bind(on_press=root.on_quit)
 
         Logger.info('Mine Generator: Draw exit menu')
@@ -140,7 +143,20 @@ class MineGenerator:
         else:
             font_color = "fa0e0e"
 
-        health_bar.text = f"Health: [color={font_color}]{str(max(0, health)).rjust(3)}[/color]"
+        health_bar.text = f"[color={font_color}]{str(max(0, health))}[/color]"
+
+    def draw_level(self, level_bar, level: int) -> None:
+        """
+        Creates visual element on screen for the level.
+        :param level_bar: Kivy label.
+        :param level: Mine depth.
+        :return:
+        """
+
+        font_colors = ["36e685", "f6d84b", "d58102", "cb650e", "be4818", "ae2a1e", "fa0e0e"]
+        font_color = font_colors[min(len(font_colors) - 1, self.level_multiplier - 1)]
+
+        level_bar.text = f"[color={font_color}]{str(level)}[/color]"
 
     def create_character(self) -> None:
         """
@@ -216,7 +232,7 @@ class MineGenerator:
                     pos=(x, y),
                     size=(self.object_size, self.object_size)
                 )
-                self.objects[f"obstacle_{x}_{y}"] = {"obstacle": object_obstacle, "health": 100}
+                self.objects[f"obstacle_{x}_{y}"] = {"obstacle": object_obstacle, "health": 100 * self.level_multiplier}
 
         Logger.info('Mine Generator: Draw obstacles')
 
@@ -252,7 +268,9 @@ class MineGenerator:
                     pos=(x, y),
                     size=(self.object_size, self.object_size)
                 )
-                self.objects[f"creature_{x}_{y}"] = {"creature": object_creature, "health": 150, "power": (5, 15)}
+                self.objects[f"creature_{x}_{y}"] = {"creature": object_creature,
+                                                     "health": 150 * self.level_multiplier,
+                                                     "power": (5 * self.level_multiplier, 15 * self.level_multiplier)}
 
         Logger.info('Mine Generator: Draw creatures')
 
