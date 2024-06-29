@@ -80,7 +80,7 @@ class ActionGenerator:
                 y += ((diff_y > 0) - (diff_y < 0)) * object_size
 
             if 0 <= x < map_size[0] and 0 <= y < map_size[1]:
-                all_objects = {k: v for k, v in objects.items() if "obstacle" in k}
+                all_objects = {k: v for k, v in objects.items() if "obstacle" in k or "creature" in k}
                 if not self._check_collision(all_objects, x, y, object_size):
                     object_character.pos = x, y
 

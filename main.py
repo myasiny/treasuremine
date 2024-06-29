@@ -41,6 +41,7 @@ class SplashScreen(Screen):
 
     def on_enter(self, *args):
         Clock.schedule_once(self.skip, 3)
+
         fade_animation = Animation(opacity=1, duration=1.5) + Animation(opacity=0, duration=1.5)
         fade_animation.start(self.ids.image_logo)
 
@@ -76,9 +77,11 @@ class GameScreen(Screen):
             current_level += 1
 
         label_level = self.ids.label_level
-        label_health = self.ids.label_health
         self.game_screen.mine_generator.draw_level(label_level, current_level)
+
+        label_health = self.ids.label_health
         self.game_screen.mine_generator.draw_health(label_health, 100)
+
         Cache.append("game", "level", current_level)
         Clock.schedule_interval(self.on_danger, 1)
 
@@ -103,6 +106,7 @@ class GameScreen(Screen):
         else:
             if not touch.is_double_tap:
                 self.touch_x, self.touch_y = touch.x, touch.y
+
                 Clock.schedule_interval(self.on_move, 0.05)
             else:
                 self.game_screen.use_tool(self.canvas)

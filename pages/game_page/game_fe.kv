@@ -16,17 +16,22 @@
         pos: root.pos
 
 <GameScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: "static/images/game_background.png"
+
     FloatLayout:
         id: layout_bar
         size_hint_y: .1
         pos_hint: {"top": 1}
 
         canvas.before:
-            Color:
-                rgba: 0.5, 0.5, 0.5, 1
             Rectangle:
                 size: self.size
                 pos: self.pos
+                source: "static/images/game_bar.png"
 
         Button:
             id: button_pause

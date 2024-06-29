@@ -9,4 +9,4 @@ environment = os.getenv("ENV", EnvironmentType.DEVELOPMENT.value)
 is_production = environment.upper() == EnvironmentType.PRODUCTION.value
 
 app_name = "Treasure Mine"
-app_icon = "static/images/logo.png"
+app_icon = "static/images/game_logo.png"

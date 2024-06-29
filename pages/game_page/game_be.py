@@ -26,6 +26,7 @@ class GameBE(BaseBE):
         object_size = self.mine_generator.object_size
         map_size = self.mine_generator.map_size
         exit_coordinates = self.mine_generator.coordinates["exit"][0]
+
         is_exit = self.action_generator.move_player(objects, touch_x, touch_y, object_size, map_size, exit_coordinates)
         if is_exit:
             root.on_complete()
@@ -38,6 +39,7 @@ class GameBE(BaseBE):
 
     def select_tool(self, new_item, old_item, item_type: ItemType) -> None:
         current_item = self.action_generator.active_item
+
         if new_item != current_item:
             self.mine_generator.draw_item_selection(new_item, old_item)
             self.action_generator.active_item = item_type
@@ -56,6 +58,7 @@ class GameBE(BaseBE):
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
         x, y = objects["character_main"]["character"].pos
+
         hit_damages, removed_objects = self.action_generator.hit_object(
             objects, x, y, object_size, tool_power, is_obstacle=is_pickaxe
         )
@@ -69,6 +72,7 @@ class GameBE(BaseBE):
         object_size = self.mine_generator.object_size
         x, y = objects["character_main"]["character"].pos
         current_health = objects["character_main"]["health"]
+
         hit_damages, new_health = self.action_generator.hit_by_creature(objects, x, y, object_size, current_health)
         if hit_damages:
             self.mine_generator.draw_hit_damages(canvas, hit_damages, x, y, is_received=True)

@@ -7,15 +7,16 @@ from kivy.animation import Animation
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.core.image import Image
 from kivy.core.window import Window
-from kivy.graphics import Canvas, Color, Ellipse, Rectangle, Line
+from kivy.graphics import Canvas, Color, Rectangle, Line
 from kivy.uix.popup import Popup
 
 
 class MineGenerator:
     max_width, max_height = Window.width, Window.height
     map_size = max_width, max_height * 0.9
-    tile_amount = 25
+    tile_amount = 20
     object_size = min(map_size) // tile_amount
     objects, coordinates, level_multiplier = None, None, None
 
@@ -41,6 +42,22 @@ class MineGenerator:
         for i in list(self.coordinates.values()):
             occupied_tiles.extend(i)
         return (x, y) in occupied_tiles
+
+    @staticmethod
+    def _load_image(filename: str, random_range: int = None):
+        """
+        Loads the image file to create visual element on screen.
+        :param filename: Image file name.
+        :param random_range: Range for random suffix.
+        :return: Kivy image.
+        """
+
+        prefix = "static/images/"
+        suffix = ".png"
+        if random_range is not None:
+            suffix = f"_{str(random.randint(1, random_range))}.png"
+
+        return Image(prefix + filename + suffix)
 
     def initialize_objects(self, level: int):
         self.objects = {}
@@ -119,7 +136,7 @@ class MineGenerator:
         """
 
         with new_item.canvas.after:
-            Color(0, 1, 0, 1)
+            Color(0, 1, 0)
             Line(rectangle=(new_item.x, new_item.y, new_item.width, new_item.height), width=2)
 
         if old_item is not None:
@@ -182,12 +199,16 @@ class MineGenerator:
         self.create_character()
 
         with canvas.after:
-            Color(1, 1, 1)
             x, y = self.coordinates["character"][0]
+
+            Color(1, 1, 1)
+            image_character = self._load_image(filename="object_character")
             object_character = Rectangle(
+                texture=image_character.texture,
                 pos=(x, y),
                 size=(self.object_size, self.object_size)
             )
+
             self.objects["character_main"] = {"character": object_character, "health": 100}
 
         Logger.info('Mine Generator: Draw character')
@@ -220,18 +241,24 @@ class MineGenerator:
         with canvas.after:
             for i, (x, y) in enumerate(self.coordinates["obstacles"]):
                 if i == 0:
-                    Color(0, 0, 1)
-                    Rectangle(
+                    Color(1, 1, 1)
+                    image_exit = self._load_image(filename="object_exit")
+                    _ = Rectangle(
+                        texture=image_exit.texture,
                         pos=(x, y),
                         size=(self.object_size, self.object_size)
                     )
+
                     self.coordinates["exit"].append((x, y))
 
-                Color(1, 0, 0)
-                object_obstacle = Ellipse(
+                Color(1, 1, 1)
+                image_obstacle = self._load_image(filename="object_obstacle", random_range=3)
+                object_obstacle = Rectangle(
+                    texture=image_obstacle.texture,
                     pos=(x, y),
                     size=(self.object_size, self.object_size)
                 )
+
                 self.objects[f"obstacle_{x}_{y}"] = {"obstacle": object_obstacle, "health": 100 * self.level_multiplier}
 
         Logger.info('Mine Generator: Draw obstacles')
@@ -263,11 +290,14 @@ class MineGenerator:
 
         with canvas.after:
             for x, y in self.coordinates["creatures"]:
-                Color(0, 1, 1)
-                object_creature = Ellipse(
+                Color(1, 1, 1)
+                image_creature = self._load_image(filename="object_creature", random_range=3)
+                object_creature = Rectangle(
+                    texture=image_creature.texture,
                     pos=(x, y),
                     size=(self.object_size, self.object_size)
                 )
+
                 self.objects[f"creature_{x}_{y}"] = {"creature": object_creature,
                                                      "health": 150 * self.level_multiplier,
                                                      "power": (5 * self.level_multiplier, 15 * self.level_multiplier)}
@@ -302,6 +332,7 @@ class MineGenerator:
                     size=(self.object_size, self.object_size),
                     color=font_color
                 )
+
                 fade_animation = Animation(y=next_y, opacity=0, duration=1)
                 fade_animation.start(label)
 
