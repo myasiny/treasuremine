@@ -18,6 +18,18 @@ class ActionGenerator:
         return exit_coordinates == coordinates
 
     @staticmethod
+    def _check_inside_map(x: int, y: int, map_size: tuple) -> bool:
+        """
+        Determines whether the coordinates are inside the map.
+        :param x: X coordinate.
+        :param y: Y coordinate.
+        :param map_size: Maximum coordinates on screen.
+        :return: True if inside, False otherwise.
+        """
+
+        return 0 <= x < map_size[0] and 0 <= y < map_size[1]
+
+    @staticmethod
     def _check_collision(all_objects: dict, new_x: int, new_y: int, object_size: int) -> bool:
         """
         Determines whether new position of the character is occupied by any object.
@@ -70,7 +82,7 @@ class ActionGenerator:
         :return: True for exit, False otherwise.
         """
 
-        if 0 <= touch_x < map_size[0] and 0 <= touch_y < map_size[1]:
+        if self._check_inside_map(touch_x, touch_y, map_size):
             object_character = objects["character_main"]["character"]
             x, y = object_character.pos
             diff_x, diff_y = touch_x - x, touch_y - y
@@ -79,7 +91,7 @@ class ActionGenerator:
             if abs(diff_y) > object_size:
                 y += ((diff_y > 0) - (diff_y < 0)) * object_size
 
-            if 0 <= x < map_size[0] and 0 <= y < map_size[1]:
+            if self._check_inside_map(x, y, map_size):
                 all_objects = {k: v for k, v in objects.items() if "obstacle" in k or "creature" in k}
                 if not self._check_collision(all_objects, x, y, object_size):
                     object_character.pos = x, y
@@ -88,6 +100,31 @@ class ActionGenerator:
 
                     return self._check_exit(exit_coordinates, (x, y))
         return False
+
+    def move_creature(self, objects: dict, object_size: int, map_size: tuple) -> None:
+        """
+        Positions visual element of a random creature into the new coordinates.
+        :param objects: All objects on screen.
+        :param object_size: Tile size.
+        :param map_size: Maximum coordinates on screen.
+        :return:
+        """
+
+        all_creatures = {k: v for k, v in objects.items() if "creature" in k}
+        creature_k = random.choice(list(all_creatures.keys()))
+        creature_x, creature_y = int(float(creature_k.split("_")[1])), int(float(creature_k.split("_")[2]))
+        object_creature = all_creatures[creature_k]["creature"]
+        while True:
+            x = int(random.randrange(creature_x - object_size, creature_x + object_size * 2, object_size))
+            y = int(random.randrange(creature_y - object_size, creature_y + object_size * 2, object_size))
+            if self._check_inside_map(x, y, map_size):
+                all_objects = {k: v for k, v in objects.items() if "obstacle" in k or "creature" in k}
+                if not self._check_collision(all_objects, x, y, object_size):
+                    object_creature.pos = x, y
+                    objects[f"creature_{x}_{y}"] = objects.pop(creature_k)
+
+                    Logger.info(f'Action Generator: Move creature to {x}, {y}')
+                    break
 
     def hit_object(self,
                    objects: dict,
@@ -143,9 +180,8 @@ class ActionGenerator:
         """
 
         hit_damages, new_health = [], character_health
-        object_key = "creature"
-        all_objects = {k: v for k, v in objects.items() if object_key in k}
-        collided_objects = self._get_collided_objects(all_objects, character_x, character_y, object_size)
+        all_creatures = {k: v for k, v in objects.items() if "creature" in k}
+        collided_objects = self._get_collided_objects(all_creatures, character_x, character_y, object_size)
         if len(collided_objects) > 0:
             for i in collided_objects:
                 object_power = objects[i]["power"]

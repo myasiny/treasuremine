@@ -21,7 +21,7 @@ class GameBE(BaseBE):
         self.mine_generator.draw_obstacles(canvas)
         self.mine_generator.draw_creatures(canvas)
 
-    def update_position(self, root, touch_x: int, touch_y: int) -> None:
+    def update_character_position(self, root, touch_x: int, touch_y: int) -> None:
         objects = self.mine_generator.objects
         object_size = self.mine_generator.object_size
         map_size = self.mine_generator.map_size
@@ -30,6 +30,13 @@ class GameBE(BaseBE):
         is_exit = self.action_generator.move_player(objects, touch_x, touch_y, object_size, map_size, exit_coordinates)
         if is_exit:
             root.on_complete()
+
+    def update_creature_position(self) -> None:
+        objects = self.mine_generator.objects
+        object_size = self.mine_generator.object_size
+        map_size = self.mine_generator.map_size
+
+        self.action_generator.move_creature(objects, object_size, map_size)
 
     def select_menu(self, root, is_exit: bool = False) -> None:
         if is_exit:

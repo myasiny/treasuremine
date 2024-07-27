@@ -84,13 +84,17 @@ class GameScreen(Screen):
 
         Cache.append("game", "level", current_level)
         Clock.schedule_interval(self.on_danger, 1)
+        Clock.schedule_interval(self.on_relocate, 0.1)
 
     def on_move(self, *args):
-        self.game_screen.update_position(self, self.touch_x, self.touch_y)
+        self.game_screen.update_character_position(self, self.touch_x, self.touch_y)
 
     def on_danger(self, *args):
         label_health = self.ids.label_health
         self.game_screen.get_damage(self, self.canvas, label_health)
+
+    def on_relocate(self, *args):
+        self.game_screen.update_creature_position()
 
     def on_touch_down(self, touch):
         button_pause = self.ids.button_pause
@@ -120,6 +124,7 @@ class GameScreen(Screen):
     def on_pause(self):
         Clock.unschedule(self.on_move)
         Clock.unschedule(self.on_danger)
+        Clock.unschedule(self.on_relocate)
 
     def on_complete(self):
         self.on_pause()
