@@ -11,6 +11,7 @@ from kivy.core.image import Image
 from kivy.core.window import Window
 from kivy.graphics import Canvas, Color, Rectangle, Line
 from kivy.uix.popup import Popup
+from kivy.uix.splitter import Splitter
 
 
 class MineGenerator:
@@ -83,17 +84,33 @@ class MineGenerator:
         layout_box = BoxLayout(orientation="vertical")
 
         if not is_dead:
-            text_next = "NEXT"
+            text_next = "PLAY"
+            text_exit = "WOW! READY FOR NEXT LEVEL?"
         else:
             text_next = "RESTART"
+            text_exit = "OOPS... MAYBE NEXT TIME?"
 
-        button_next = Button(text=text_next)
+        button_next = Button(text=text_next,
+                             background_color=(.5, .3, .1),
+                             background_normal="static/images/button_up.png",
+                             background_down="static/images/button_down.png")
         layout_box.add_widget(button_next)
 
-        button_quit = Button(text="QUIT")
+        splitter = Splitter(sizable_from="top", size_hint_y=.1)
+        layout_box.add_widget(splitter)
+
+        button_quit = Button(text="QUIT",
+                             background_color=(.5, .3, .1),
+                             background_normal="static/images/button_up.png",
+                             background_down="static/images/button_down.png")
         layout_box.add_widget(button_quit)
 
-        menu_exit = Popup(title="EXIT MENU", content=layout_box, size_hint=(.5, .5), auto_dismiss=False)
+        menu_exit = Popup(title=text_exit,
+                          content=layout_box,
+                          size_hint=(.5, .5),
+                          separator_color=(.5, .3, .1),
+                          background_color=(.5, .3, .1),
+                          auto_dismiss=False)
         menu_exit.open()
 
         button_next.bind(on_press=menu_exit.dismiss)
@@ -112,17 +129,30 @@ class MineGenerator:
 
         layout_box = BoxLayout(orientation="vertical")
 
-        button_quit = Button(text="QUIT")
-        layout_box.add_widget(button_quit)
-
-        button_close = Button(text="CLOSE")
+        button_close = Button(text="CONTINUE",
+                              background_color=(.5, .3, .1),
+                              background_normal="static/images/button_up.png",
+                              background_down="static/images/button_down.png")
         layout_box.add_widget(button_close)
 
-        menu_popup = Popup(title="POP-UP MENU", content=layout_box, size_hint=(.5, .5))
+        splitter = Splitter(sizable_from="top", size_hint_y=.1)
+        layout_box.add_widget(splitter)
+
+        button_quit = Button(text="QUIT",
+                             background_color=(.5, .3, .1),
+                             background_normal="static/images/button_up.png",
+                             background_down="static/images/button_down.png")
+        layout_box.add_widget(button_quit)
+
+        menu_popup = Popup(title="",
+                           content=layout_box,
+                           size_hint=(.5, .5),
+                           separator_color=(.5, .3, .1),
+                           background_color=(.5, .3, .1))
         menu_popup.open()
 
-        button_quit.bind(on_press=root.on_quit)
         button_close.bind(on_press=menu_popup.dismiss)
+        button_quit.bind(on_press=root.on_quit)
 
         Logger.info('Mine Generator: Draw pop-up menu')
 
@@ -136,7 +166,7 @@ class MineGenerator:
         """
 
         with new_item.canvas.after:
-            Color(0, 1, 0)
+            Color(.5, .3, .1)
             Line(rectangle=(new_item.x, new_item.y, new_item.width, new_item.height), width=2)
 
         if old_item is not None:

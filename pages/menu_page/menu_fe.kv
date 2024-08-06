@@ -2,6 +2,13 @@
     FloatLayout:
         id: layout_menu
 
+        canvas.before:
+            Color:
+                rgba: .25, .15, .05, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
         Image:
             id: image_logo
             source: "static/images/game_logo.png"
@@ -11,14 +18,20 @@
 
         Button:
             id: button_start
-            text: "START"
-            size_hint_y: .1
+            text: "PLAY"
+            size_hint_y: .2
             pos_hint: {"center_x": .5, "center_y": .5}
+            background_color: .5, .3, .1
+            background_normal: "static/images/button_up.png"
+            background_down: "static/images/button_down.png"
             on_release: root.on_start()
 
         Button:
             id: button_quit
             text: "QUIT"
-            size_hint_y: .1
+            size_hint_y: .2
             pos_hint: {"center_x": .5, "center_y": .25}
+            background_color: .5, .3, .1
+            background_normal: "static/images/button_up.png"
+            background_down: "static/images/button_down.png"
             on_release: root.on_quit()
