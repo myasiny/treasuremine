@@ -10,3 +10,4 @@ is_production = environment.upper() == EnvironmentType.PRODUCTION.value
 
 app_name = "Treasure Mine"
 app_icon = "static/images/game_logo.png"
+app_track = "static/sounds/game_music.wav"

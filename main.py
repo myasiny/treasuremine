@@ -25,6 +25,7 @@ from kivy.cache import Cache
 from kivy.clock import Clock
 from kivy.animation import Animation
 from kivy.core.window import Window
+from kivy.core.audio import SoundLoader
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 
 from configs import settings
@@ -52,6 +53,14 @@ class SplashScreen(Screen):
 class MenuScreen(Screen):
     menu_screen = MenuBE()
     menu_screen.load_design()
+
+    sound_track = None
+
+    def on_enter(self, *args):
+        self.sound_track = SoundLoader.load(settings.app_track)
+        if self.sound_track:
+            self.sound_track.loop = True
+            self.sound_track.play()
 
     def on_start(self):
         self.menu_screen.change_page(screen, GameScreen(name=GameScreen.__name__))
