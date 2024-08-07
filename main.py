@@ -12,20 +12,23 @@ __license__ = "Apache License 2.0"
 __version__ = "0.0.1"
 __status__ = "Development"
 
-from kivy.cache import Cache
-from kivy.config import Config
+import os
 
-from enums.item_type import ItemType
+os.environ["KIVY_AUDIO"] = "sdl2"  # should be configured before importing Kivy
+
+from kivy.config import Config
 
 Config.set("graphics", "resizable", False)  # should be used before importing any other Kivy modules
 
 from kivy.app import App
-from kivy.animation import Animation
+from kivy.cache import Cache
 from kivy.clock import Clock
+from kivy.animation import Animation
 from kivy.core.window import Window
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 
 from configs import settings
+from enums.item_type import ItemType
 from pages.game_page.game_be import GameBE
 from pages.menu_page.menu_be import MenuBE
 from pages.splash_page.splash_be import SplashBE

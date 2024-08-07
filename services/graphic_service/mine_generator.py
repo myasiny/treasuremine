@@ -4,6 +4,7 @@ from functools import partial
 
 from kivy import Logger
 from kivy.animation import Animation
+from kivy.core.audio import SoundLoader
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -61,6 +62,19 @@ class MineGenerator:
 
         return Image(prefix + filename + suffix)
 
+    @staticmethod
+    def _load_sound(filename: str):
+        """
+        Loads the sound file to play on screen.
+        :param filename: Sound file name.
+        :return: Kivy sound.
+        """
+
+        prefix = "static/sounds/"
+        suffix = ".wav"
+
+        return SoundLoader.load(prefix + filename + suffix)
+
     def initialize_objects(self, level: int):
         self.objects = {}
         self.coordinates = {
@@ -71,8 +85,7 @@ class MineGenerator:
         }
         self.level_multiplier = int(math.log(level + 1, 2))
 
-    @staticmethod
-    def draw_exit_menu(root, is_dead: bool) -> None:
+    def draw_exit_menu(self, root, is_dead: bool) -> None:
         """
         Creates visual element on screen for the exit menu.
         :param root: Kivy root.
@@ -85,9 +98,13 @@ class MineGenerator:
         layout_box = BoxLayout(orientation="vertical")
 
         if not is_dead:
+            self.play_effect(effect="game_success")
+
             text_next = "PLAY"
             text_exit = "WOW! READY FOR NEXT LEVEL?"
         else:
+            self.play_effect(effect="game_fail")
+
             text_next = "RESTART"
             text_exit = "OOPS... MAYBE NEXT TIME?"
 
@@ -362,10 +379,14 @@ class MineGenerator:
             self.draw_effect(x=x, y=y, is_smoke=not is_received)
 
             if is_received:
+                self.play_effect(effect="hit_damage")
+
                 font_color = (1, 0, 0, 0.5)
                 y -= self.object_size
                 next_y = y - self.object_size
             else:
+                self.play_effect(effect="hit_object")
+
                 font_color = (0, 1, 0, 0.5)
                 y += self.object_size
                 next_y = y + self.object_size
@@ -385,7 +406,7 @@ class MineGenerator:
 
     def draw_effect(self, x: int, y: int, is_smoke: bool = True) -> None:
         """
-        Creates visual element on screen for action effects.
+        Creates visual element on screen for action effect.
         :param x: X coordinate.
         :param y: Y coordinate.
         :param is_smoke: True for rising smoke, False for flowing drop.
@@ -409,6 +430,21 @@ class MineGenerator:
         fade_animation = Animation(y=next_y, opacity=0, duration=0.5)
         fade_animation.start(pic_effect)
 
+        Logger.info('Mine Generator: Draw effect')
+
+    def play_effect(self, effect: str) -> None:
+        """
+        Plays sound for action effect.
+        :param effect: Effect name.
+        :return:
+        """
+
+        sound_effect = self._load_sound(filename=effect)
+        if sound_effect:
+            sound_effect.play()
+
+            Logger.info('Mine Generator: Play effect')
+
     def remove_objects(self, canvas: Canvas, removed_objects: list) -> None:
         """
         Deletes the visual elements of the objects from screen.
@@ -420,6 +456,7 @@ class MineGenerator:
         for i in removed_objects:
             with canvas.after:
                 self.draw_effect(x=i.pos[0], y=i.pos[1])
+                self.play_effect(effect="hit_remove")
 
             canvas.after.remove(i)
 
