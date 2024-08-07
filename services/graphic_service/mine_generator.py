@@ -12,6 +12,7 @@ from kivy.core.window import Window
 from kivy.graphics import Canvas, Color, Rectangle, Line
 from kivy.uix.popup import Popup
 from kivy.uix.splitter import Splitter
+from kivy.uix.image import Image as Pic
 
 
 class MineGenerator:
@@ -90,27 +91,33 @@ class MineGenerator:
             text_next = "RESTART"
             text_exit = "OOPS... MAYBE NEXT TIME?"
 
-        button_next = Button(text=text_next,
-                             background_color=(.5, .3, .1),
-                             background_normal="static/images/button_up.png",
-                             background_down="static/images/button_down.png")
+        button_next = Button(
+            text=text_next,
+            background_color=(.5, .3, .1),
+            background_normal="static/images/button_up.png",
+            background_down="static/images/button_down.png"
+        )
         layout_box.add_widget(button_next)
 
         splitter = Splitter(sizable_from="top", size_hint_y=.1)
         layout_box.add_widget(splitter)
 
-        button_quit = Button(text="QUIT",
-                             background_color=(.5, .3, .1),
-                             background_normal="static/images/button_up.png",
-                             background_down="static/images/button_down.png")
+        button_quit = Button(
+            text="QUIT",
+            background_color=(.5, .3, .1),
+            background_normal="static/images/button_up.png",
+            background_down="static/images/button_down.png"
+        )
         layout_box.add_widget(button_quit)
 
-        menu_exit = Popup(title=text_exit,
-                          content=layout_box,
-                          size_hint=(.5, .5),
-                          separator_color=(.5, .3, .1),
-                          background_color=(.5, .3, .1),
-                          auto_dismiss=False)
+        menu_exit = Popup(
+            title=text_exit,
+            content=layout_box,
+            size_hint=(.5, .5),
+            separator_color=(.5, .3, .1),
+            background_color=(.5, .3, .1),
+            auto_dismiss=False
+        )
         menu_exit.open()
 
         button_next.bind(on_press=menu_exit.dismiss)
@@ -129,26 +136,32 @@ class MineGenerator:
 
         layout_box = BoxLayout(orientation="vertical")
 
-        button_close = Button(text="CONTINUE",
-                              background_color=(.5, .3, .1),
-                              background_normal="static/images/button_up.png",
-                              background_down="static/images/button_down.png")
+        button_close = Button(
+            text="CONTINUE",
+            background_color=(.5, .3, .1),
+            background_normal="static/images/button_up.png",
+            background_down="static/images/button_down.png"
+        )
         layout_box.add_widget(button_close)
 
         splitter = Splitter(sizable_from="top", size_hint_y=.1)
         layout_box.add_widget(splitter)
 
-        button_quit = Button(text="QUIT",
-                             background_color=(.5, .3, .1),
-                             background_normal="static/images/button_up.png",
-                             background_down="static/images/button_down.png")
+        button_quit = Button(
+            text="QUIT",
+            background_color=(.5, .3, .1),
+            background_normal="static/images/button_up.png",
+            background_down="static/images/button_down.png"
+        )
         layout_box.add_widget(button_quit)
 
-        menu_popup = Popup(title="",
-                           content=layout_box,
-                           size_hint=(.5, .5),
-                           separator_color=(.5, .3, .1),
-                           background_color=(.5, .3, .1))
+        menu_popup = Popup(
+            title="",
+            content=layout_box,
+            size_hint=(.5, .5),
+            separator_color=(.5, .3, .1),
+            background_color=(.5, .3, .1)
+        )
         menu_popup.open()
 
         button_close.bind(on_press=menu_popup.dismiss)
@@ -346,6 +359,8 @@ class MineGenerator:
         """
 
         with canvas.after:
+            self.draw_effect(x=x, y=y, is_smoke=not is_received)
+
             if is_received:
                 font_color = (1, 0, 0, 0.5)
                 y -= self.object_size
@@ -368,8 +383,33 @@ class MineGenerator:
 
         Logger.info('Mine Generator: Draw hit damages')
 
-    @staticmethod
-    def remove_objects(canvas: Canvas, removed_objects: list) -> None:
+    def draw_effect(self, x: int, y: int, is_smoke: bool = True) -> None:
+        """
+        Creates visual element on screen for action effects.
+        :param x: X coordinate.
+        :param y: Y coordinate.
+        :param is_smoke: True for rising smoke, False for flowing drop.
+        :return:
+        """
+
+        if is_smoke:
+            source = "static/images/pic_smoke.png"
+            next_y = y + (self.object_size * 2 / 3)
+            y += self.object_size / 3
+        else:
+            source = "static/images/pic_water.png"
+            next_y = y + (self.object_size / 3)
+            y += self.object_size * 2 / 3
+
+        pic_effect = Pic(
+            source=source,
+            pos=(x + self.object_size / 3, y),
+            size=(self.object_size / 3, self.object_size / 3)
+        )
+        fade_animation = Animation(y=next_y, opacity=0, duration=0.5)
+        fade_animation.start(pic_effect)
+
+    def remove_objects(self, canvas: Canvas, removed_objects: list) -> None:
         """
         Deletes the visual elements of the objects from screen.
         :param canvas: Kivy canvas.
@@ -378,6 +418,9 @@ class MineGenerator:
         """
 
         for i in removed_objects:
+            with canvas.after:
+                self.draw_effect(x=i.pos[0], y=i.pos[1])
+
             canvas.after.remove(i)
 
         Logger.info(f'Mine Generator: Remove {len(removed_objects)} objects')
