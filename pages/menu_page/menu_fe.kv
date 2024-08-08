@@ -1,36 +1,47 @@
+#:import Gradient kivy_gradient.Gradient
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+
 <MenuScreen>:
     FloatLayout:
         id: layout_menu
 
         canvas.before:
-            Color:
-                rgba: .25, .15, .05, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
+                texture: Gradient.vertical(get_color_from_hex("441e05"), get_color_from_hex("fe924b"))
 
         Image:
             id: image_logo
             source: "static/images/game_logo.png"
             size_hint_y: .1
-            pos_hint: {"center_x": .5, "center_y": .75}
-            allow_stretch: True
+            pos_hint: {"center_x": .5, "center_y": .85}
 
         Button:
             id: button_start
             text: "PLAY"
             size_hint_y: .2
-            pos_hint: {"center_x": .5, "center_y": .5}
+            pos_hint: {"center_x": .5, "center_y": .65}
             background_color: .5, .3, .1
             background_normal: "static/images/button_up.png"
             background_down: "static/images/button_down.png"
             on_release: root.on_start()
 
         Button:
+            id: button_how
+            text: "INSTRUCTIONS"
+            size_hint_y: .2
+            pos_hint: {"center_x": .5, "center_y": .4}
+            background_color: .5, .3, .1
+            background_normal: "static/images/button_up.png"
+            background_down: "static/images/button_down.png"
+            on_release: root.on_how()
+
+        Button:
             id: button_quit
             text: "QUIT"
             size_hint_y: .2
-            pos_hint: {"center_x": .5, "center_y": .25}
+            pos_hint: {"center_x": .5, "center_y": .15}
             background_color: .5, .3, .1
             background_normal: "static/images/button_up.png"
             background_down: "static/images/button_down.png"

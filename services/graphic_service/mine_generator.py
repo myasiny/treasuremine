@@ -5,6 +5,7 @@ from functools import partial
 from kivy import Logger
 from kivy.animation import Animation
 from kivy.core.audio import SoundLoader
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -16,12 +17,17 @@ from kivy.uix.splitter import Splitter
 from kivy.uix.image import Image as Pic
 
 
+class ImageButton(ButtonBehavior, Pic):
+    def __init__(self, **kwargs):
+        super(ImageButton, self).__init__(**kwargs)
+
+
 class MineGenerator:
     max_width, max_height = Window.width, Window.height
     map_size = max_width, max_height * 0.9
     tile_amount = 20
     object_size = min(map_size) // tile_amount
-    objects, coordinates, level_multiplier = None, None, None
+    objects, coordinates, level_multiplier, max_level_multiplier = None, None, None, 7
 
     def _generate_x_y(self) -> tuple:
         """
@@ -47,18 +53,24 @@ class MineGenerator:
         return (x, y) in occupied_tiles
 
     @staticmethod
-    def _load_image(filename: str, random_range: int = None):
+    def _load_image(filename: str, random_range: int = None, is_png: bool = True):
         """
         Loads the image file to create visual element on screen.
         :param filename: Image file name.
         :param random_range: Range for random suffix.
+        :param is_png: True for png, False for gif.
         :return: Kivy image.
         """
 
         prefix = "static/images/"
-        suffix = ".png"
+
+        if is_png:
+            suffix = ".png"
+        else:
+            suffix = ".gif"
+
         if random_range is not None:
-            suffix = f"_{str(random.randint(1, random_range))}.png"
+            suffix = f"_{str(random.randint(1, random_range))}" + suffix
 
         return Image(prefix + filename + suffix)
 
@@ -83,7 +95,7 @@ class MineGenerator:
             "creatures": [],
             "exit": []
         }
-        self.level_multiplier = int(math.log(level + 1, 2))
+        self.level_multiplier = level  # TODO: int(math.log(level + 1, 2))
 
     def draw_exit_menu(self, root, is_dead: bool) -> None:
         """
@@ -97,26 +109,40 @@ class MineGenerator:
 
         layout_box = BoxLayout(orientation="vertical")
 
-        if not is_dead:
+        if self.level_multiplier != self.max_level_multiplier:
+            if is_dead:
+                self.play_effect(effect="game_fail")
+
+                text_next = "RESTART"
+                text_exit = "OOPS... MAYBE NEXT TIME?"
+            else:
+                self.play_effect(effect="game_success")
+
+                text_next = "PLAY"
+                text_exit = "WOW! READY FOR NEXT LEVEL?"
+
+            button_next = Button(
+                text=text_next,
+                background_color=(.5, .3, .1),
+                background_normal="static/images/button_up.png",
+                background_down="static/images/button_down.png"
+            )
+
+            button_next.bind(on_press=partial(root.on_next, is_dead))
+        else:
             self.play_effect(effect="game_success")
 
-            text_next = "PLAY"
-            text_exit = "WOW! READY FOR NEXT LEVEL?"
-        else:
-            self.play_effect(effect="game_fail")
+            text_exit = "CONGRATULATIONS!"
 
-            text_next = "RESTART"
-            text_exit = "OOPS... MAYBE NEXT TIME?"
+            button_next = ImageButton(
+                source="static/images/button_chest.png"
+            )
 
-        button_next = Button(
-            text=text_next,
-            background_color=(.5, .3, .1),
-            background_normal="static/images/button_up.png",
-            background_down="static/images/button_down.png"
-        )
+            button_next.bind(on_press=root.on_quit)
+
         layout_box.add_widget(button_next)
 
-        splitter = Splitter(sizable_from="top", size_hint_y=.1)
+        splitter = Splitter(sizable_from="top", size_hint_y=.2)
         layout_box.add_widget(splitter)
 
         button_quit = Button(
@@ -138,7 +164,6 @@ class MineGenerator:
         menu_exit.open()
 
         button_next.bind(on_press=menu_exit.dismiss)
-        button_next.bind(on_press=partial(root.on_next, is_dead))
         button_quit.bind(on_press=root.on_quit)
 
         Logger.info('Mine Generator: Draw exit menu')
@@ -261,10 +286,8 @@ class MineGenerator:
         with canvas.after:
             x, y = self.coordinates["character"][0]
 
-            Color(1, 1, 1)
-            image_character = self._load_image(filename="object_character")
-            object_character = Rectangle(
-                texture=image_character.texture,
+            object_character = Pic(
+                source="static/images/object_character.gif",
                 pos=(x, y),
                 size=(self.object_size, self.object_size)
             )

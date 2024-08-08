@@ -26,6 +26,11 @@ from kivy.clock import Clock
 from kivy.animation import Animation
 from kivy.core.window import Window
 from kivy.core.audio import SoundLoader
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+from kivy.uix.popup import Popup
+from kivy.uix.splitter import Splitter
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 
 from configs import settings
@@ -65,6 +70,40 @@ class MenuScreen(Screen):
     def on_start(self):
         self.menu_screen.change_page(screen, GameScreen(name=GameScreen.__name__))
 
+    def on_how(self):
+        layout_box = BoxLayout(orientation="vertical")
+
+        label_how = TextInput(
+            text="Find the hidden ladder under rocks to go deeper into the mine and reach the treasure chest. Click "
+                 "once to move and twice to attack. Use the pickaxe on rocks and the sword on creatures.",
+            background_color=(.5, .3, .1),
+            disabled_foreground_color=(1, 1, 1),
+            disabled=True
+        )
+        layout_box.add_widget(label_how)
+
+        splitter = Splitter(sizable_from="top", size_hint_y=.1)
+        layout_box.add_widget(splitter)
+
+        button_close = Button(
+            text="CLOSE",
+            background_color=(.5, .3, .1),
+            background_normal="static/images/button_up.png",
+            background_down="static/images/button_down.png"
+        )
+        layout_box.add_widget(button_close)
+
+        menu_popup = Popup(
+            title="HOW TO PLAY?",
+            content=layout_box,
+            size_hint=(.5, .5),
+            separator_color=(.5, .3, .1),
+            background_color=(.5, .3, .1)
+        )
+        menu_popup.open()
+
+        button_close.bind(on_press=menu_popup.dismiss)
+
     def on_quit(self):
         self.menu_screen.stop_app()
 
@@ -84,7 +123,8 @@ class GameScreen(Screen):
         current_level = Cache.get("game", "level", default=1)
         if is_restart:
             item_pickaxe = self.ids.item_pickaxe
-            self.game_screen.select_tool(item_pickaxe, None, ItemType.BASIC_PICKAXE)
+            item_sword = self.ids.item_sword
+            self.game_screen.select_tool(item_pickaxe, item_sword, ItemType.BASIC_PICKAXE)
         else:
             current_level += 1
 
