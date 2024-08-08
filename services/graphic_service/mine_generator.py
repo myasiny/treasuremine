@@ -307,7 +307,7 @@ class MineGenerator:
             if not self._check_x_y(x, y):
                 self.coordinates["obstacles"].append((x, y))
 
-            if len(self.coordinates["obstacles"]) == (self.tile_amount // 2):
+            if len(self.coordinates["obstacles"]) == (self.tile_amount // 2) + self.level_multiplier:
                 break
 
         Logger.info(f'Mine Generator: Create {len(self.coordinates["obstacles"])} obstacles')
@@ -342,7 +342,7 @@ class MineGenerator:
                     size=(self.object_size, self.object_size)
                 )
 
-                self.objects[f"obstacle_{x}_{y}"] = {"obstacle": object_obstacle, "health": 100 * self.level_multiplier}
+                self.objects[f"obstacle_{x}_{y}"] = {"obstacle": object_obstacle, "health": 50 * self.level_multiplier}
 
         Logger.info('Mine Generator: Draw obstacles')
 
@@ -357,7 +357,7 @@ class MineGenerator:
             if not self._check_x_y(x, y):
                 self.coordinates["creatures"].append((x, y))
 
-            if len(self.coordinates["creatures"]) == (self.tile_amount // 3):
+            if len(self.coordinates["creatures"]) == (self.tile_amount // 3) + self.level_multiplier:
                 break
 
         Logger.info(f'Mine Generator: Create {len(self.coordinates["creatures"])} creatures')
@@ -382,7 +382,7 @@ class MineGenerator:
                 )
 
                 self.objects[f"creature_{x}_{y}"] = {"creature": object_creature,
-                                                     "health": 150 * self.level_multiplier,
+                                                     "health": 50 * self.level_multiplier,
                                                      "power": (5 * self.level_multiplier, 15 * self.level_multiplier)}
 
         Logger.info('Mine Generator: Draw creatures')
